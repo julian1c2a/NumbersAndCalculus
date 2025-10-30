@@ -1,0 +1,56 @@
+# Archivos de construcción
+build/
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+Makefile
+*.vcxproj*
+*.sln
+*.suo
+*.user
+
+# Archivos binarios
+*.exe
+*.dll
+*.so
+*.dylib
+*.a
+*.lib
+*.pdb
+*.ilk
+
+# Ejecutables específicos del proyecto
+test_*.exe
+*_test.exe
+*_demo.exe
+simple_test
+complete_test
+factorial_demo
+test_constexpr
+basic_test
+demo_big_integers
+
+# Archivos de depuración
+*.dSYM/
+*.debug
+
+# Archivos temporales
+*.tmp
+*.temp
+*.log
+*.out
+
+# Archivos del sistema
+.DS_Store
+Thumbs.db
+
+# Archivos de IDE
+.vscode/
+.vs/
+*.code-workspace
+
+# Archivos de vcpkg
+vcpkg_installed/
+
+# Archivos de Catch2
+catch2/
