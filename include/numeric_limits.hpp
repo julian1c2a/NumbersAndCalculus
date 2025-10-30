@@ -386,6 +386,8 @@ public:
  * Entero de 128 bits sin signo, de tamaño fijo.
  */
 template <> class numeric_limits<boost::multiprecision::uint128_t> {
+  using mp = boost::multiprecision;
+
 public:
   static constexpr bool is_specialized = true;
   static constexpr bool is_signed = false;
@@ -414,34 +416,20 @@ public:
   static constexpr bool tinyness_before = false;
 
   /// @brief Valor mínimo (0 para unsigned)
-  static constexpr boost::multiprecision::uint128_t min() noexcept { return 0; }
+  static constexpr mp::uint128_t min() noexcept { return 0; }
 
   /// @brief Valor máximo representable (2^128 - 1)
-  static constexpr boost::multiprecision::uint128_t max() noexcept {
-    return (boost::multiprecision::uint128_t(1) << 128) - 1;
+  static constexpr mp::uint128_t max() noexcept {
+    return (mp::uint128_t(1) << 128) - 1;
   }
 
-  static constexpr boost::multiprecision::uint128_t lowest() noexcept {
-    return min();
-  }
-  static constexpr boost::multiprecision::uint128_t epsilon() noexcept {
-    return 0;
-  }
-  static constexpr boost::multiprecision::uint128_t round_error() noexcept {
-    return 0;
-  }
-  static constexpr boost::multiprecision::uint128_t infinity() noexcept {
-    return 0;
-  }
-  static constexpr boost::multiprecision::uint128_t quiet_NaN() noexcept {
-    return 0;
-  }
-  static constexpr boost::multiprecision::uint128_t signaling_NaN() noexcept {
-    return 0;
-  }
-  static constexpr boost::multiprecision::uint128_t denorm_min() noexcept {
-    return 0;
-  }
+  static constexpr mp::uint128_t lowest() noexcept { return min(); }
+  static constexpr mp::uint128_t epsilon() noexcept { return 0; }
+  static constexpr mp::uint128_t round_error() noexcept { return 0; }
+  static constexpr mp::uint128_t infinity() noexcept { return 0; }
+  static constexpr mp::uint128_t quiet_NaN() noexcept { return 0; }
+  static constexpr mp::uint128_t signaling_NaN() noexcept { return 0; }
+  static constexpr mp::uint128_t denorm_min() noexcept { return 0; }
 };
 
 // Las especializaciones para int256_t, int512_t, int1024_t y sus versiones
@@ -602,21 +590,17 @@ public:
 
 namespace numeric_limits_extensions {
 
+using mp = boost::multiprecision;
+
 // Especializaciones del trait is_arbitrary_precision
-template <>
-struct is_arbitrary_precision<boost::multiprecision::cpp_int> : std::true_type {
-};
+template <> struct is_arbitrary_precision<mp::cpp_int> : std::true_type {};
 
 #ifdef BOOST_HAS_TOMMATH
-template <>
-struct is_arbitrary_precision<boost::multiprecision::tom_int> : std::true_type {
-};
+template <> struct is_arbitrary_precision<mp::tom_int> : std::true_type {};
 #endif
 
 #ifdef BOOST_HAS_GMP
-template <>
-struct is_arbitrary_precision<boost::multiprecision::mpz_int> : std::true_type {
-};
+template <> struct is_arbitrary_precision<mp::mpz_int> : std::true_type {};
 #endif
 
 // Los tipos __int128 y unsigned __int128 ya están soportados nativamente

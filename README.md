@@ -283,7 +283,7 @@ Este proyecto está bajo la Licencia MIT - ver el archivo [LICENSE](LICENSE) par
 
 ## Autor
 
-- Tu Nombre - [@tu_usuario](https://github.com/tu_usuario)
+- Julián Calderón Almendros - [@julian1c2a](https://github.com/julian1c2a)
 
 ## Problemas Conocidos
 
