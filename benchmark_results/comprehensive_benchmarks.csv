@@ -1,0 +1,8 @@
+Test Name,Iterations,Successful Operations,Failed Operations,Average Time (ns),Min Time (ns),Max Time (ns),Operations per Second
+"Legacy CalculationResult Division",500000,497420,2580,29.366,0.000,45200.000,34053218
+"Modern std::optional Division",500000,497420,2580,28.788,0.000,51200.000,34736454
+"Legacy CalculationResult Lookup",1000000,636060,363940,29.294,0.000,123100.000,34136916
+"Modern std::optional Lookup",1000000,636060,363940,27.453,0.000,37100.000,36426422
+"Pure Functions (Square)",50000000,50000000,0,1.001,1.001,1.001,999400359
+"Lookup Tables Sequential Access",5000000,5000000,0,0.000,0.000,0.000,0
+"Lookup Tables Random Access",5000000,3185050,1814950,5.615,5.615,5.615,178107077

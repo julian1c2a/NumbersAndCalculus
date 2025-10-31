@@ -12,8 +12,9 @@
  */
 
 #include "../../type_traits/extended_integral_traits.hpp"
+#include "lookup_tables/power_of_2_lookup_tables.hpp"
 #include "trait_based_specializations.hpp"
-
+#include <cstdint>
 
 namespace number_calc {
 namespace integral_power_functions {
@@ -25,14 +26,16 @@ using namespace number_calc::type_traits;
 //==============================================================================
 
 /**
- * @brief Función altamente optimizada para potencias de 2
+ * @brief Función altamente optimizada para potencias de 2 con tablas constexpr
  * @tparam T Tipo entero de retorno
  * @tparam U Tipo del exponente
  * @param exp Exponente (2^exp)
  * @return 2^exp
  *
- * Usa desplazamiento de bits para máxima eficiencia.
- * Incluye verificaciones de overflow para tipos pequeños.
+ * OPTIMIZACIONES POR TIPO:
+ * - int8_t/uint8_t/int16_t/uint16_t: Tablas constexpr precalculadas
+ * - Tipos medianos: Desplazamiento de bits
+ * - Tipos grandes: Fallback a algoritmo general
  */
 template <typename T, typename U> constexpr T int_power_2(U exp) noexcept {
   static_assert(is_integral_extended_v<T>, "T debe ser un tipo integral");
@@ -41,7 +44,20 @@ template <typename T, typename U> constexpr T int_power_2(U exp) noexcept {
   if (exp == 0)
     return T{1};
 
-  // Usar desplazamiento de bits para tipos pequeños/medianos
+  // OPTIMIZACIÓN NIVEL 1: Tablas constexpr para tipos pequeños (8 y 16 bits)
+  if constexpr (std::is_same_v<T, int8_t> || std::is_same_v<T, uint8_t> ||
+                std::is_same_v<T, int16_t> || std::is_same_v<T, uint16_t>) {
+
+    // Verificar si el exponente está en rango válido para tabla lookup
+    if (lookup_tables::is_valid_power_of_2_exponent<T>(static_cast<int>(exp))) {
+      return lookup_tables::get_power_of_2_from_table<T>(static_cast<int>(exp));
+    }
+    // Si fuera de rango, fallback a algoritmo general (causará overflow, pero
+    // es consistente)
+    return int_power_dispatch(T{2}, exp);
+  }
+
+  // OPTIMIZACIÓN NIVEL 2: Desplazamiento de bits para tipos medianos
   if constexpr (is_signed_extended_v<T>) {
     // Para tipos signed, verificar límites para evitar overflow
     if constexpr (sizeof(T) == sizeof(int)) {
@@ -74,11 +90,9 @@ template <typename T, typename U> constexpr T int_power_2(U exp) noexcept {
 #endif
   }
 
-  // Fallback para tipos grandes o exponentes grandes
+  // OPTIMIZACIÓN NIVEL 3: Fallback para tipos grandes o exponentes grandes
   return int_power_dispatch(T{2}, exp);
-}
-
-//==============================================================================
+} //==============================================================================
 // FUNCIONES DE DETECCIÓN AUTOMÁTICA
 //==============================================================================
 
@@ -180,7 +194,25 @@ constexpr T int_power_smart(T base, U exp) noexcept {
   if (base == 1)
     return T{1};
 
-  // Detectar si base es potencia de 2
+  // OPTIMIZACIÓN NIVEL 1: Tipos pequeños con tablas constexpr
+  if constexpr (std::is_same_v<T, int8_t> || std::is_same_v<T, uint8_t> ||
+                std::is_same_v<T, int16_t> || std::is_same_v<T, uint16_t>) {
+
+    // Para tipos pequeños, optimización especial para base = 2
+    if (base == T{2}) {
+      return int_power_2<T>(exp);
+    }
+
+    // Para otros casos de tipos pequeños, usar dispatch normal
+    // (las tablas constexpr se aplicarán automáticamente en int_power_2)
+  }
+
+  // OPTIMIZACIÓN NIVEL 2: Base = 2 para cualquier tipo
+  if (base == T{2}) {
+    return int_power_2<T>(exp);
+  }
+
+  // OPTIMIZACIÓN NIVEL 3: Base es potencia de 2 (4, 8, 16, ...)
   if (is_power_of_2(base)) {
     int base_exp = find_power_of_2_exponent(base);
     if (base_exp > 0) {
@@ -189,7 +221,7 @@ constexpr T int_power_smart(T base, U exp) noexcept {
     }
   }
 
-  // Usar dispatch normal
+  // OPTIMIZACIÓN NIVEL 4: Dispatch normal por traits
   return int_power_dispatch(base, exp);
 }
 

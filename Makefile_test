@@ -1,0 +1,15 @@
+CXX = g++
+CXXFLAGS = -std=c++14 -Wall -Wextra -O2
+TARGET = test_small_type_optimizations
+SOURCE = test_small_type_optimizations.cpp
+
+$(TARGET).exe: $(SOURCE) simplified_power_tables_cpp14.hpp
+	$(CXX) $(CXXFLAGS) $(SOURCE) -o $(TARGET).exe
+
+clean:
+	rm -f $(TARGET).exe
+
+run: $(TARGET).exe
+	./$(TARGET).exe
+
+.PHONY: clean run

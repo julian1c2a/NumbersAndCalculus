@@ -93,7 +93,7 @@ constexpr bool is_unsigned_extended_v = is_unsigned_extended<T>::value;
  * @brief Concept-like helper para validar tipos integrales extendidos
  * @tparam T Tipo a validar
  */
-template <typename T> constexpr bool is_valid_integral_type() {
+template <typename T> constexpr bool is_valid_integral_type() noexcept {
   return is_integral_extended_v<T>;
 }
 
@@ -101,7 +101,7 @@ template <typename T> constexpr bool is_valid_integral_type() {
  * @brief Concept-like helper para validar tipos signed extendidos
  * @tparam T Tipo a validar
  */
-template <typename T> constexpr bool is_valid_signed_type() {
+template <typename T> constexpr bool is_valid_signed_type() noexcept {
   return is_integral_extended_v<T> && is_signed_extended_v<T>;
 }
 
@@ -109,8 +109,8 @@ template <typename T> constexpr bool is_valid_signed_type() {
  * @brief Concept-like helper para validar tipos unsigned extendidos
  * @tparam T Tipo a validar
  */
-template <typename T> constexpr bool is_valid_unsigned_type() {
-  return is_integral_extended_v<T> && is_unsigned_extended_v<T>;
+template <typename T> constexpr bool is_valid_unsigned_type() noexcept {
+  return is_integral_extended_v<T> && !is_signed_extended_v<T>;
 }
 
 } // namespace type_traits
