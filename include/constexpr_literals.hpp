@@ -46,8 +46,7 @@ constexpr __int128 operator""_i128(unsigned long long value) noexcept {
  * @param value Valor entero
  * @return unsigned __int128 evaluado en tiempo de compilación
  */
-constexpr unsigned __int128
-operator""_ui128(unsigned long long value) noexcept {
+constexpr unsigned __int128 operator""_ui128(unsigned long long value) noexcept {
   return static_cast<unsigned __int128>(value);
 }
 
