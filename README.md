@@ -18,10 +18,18 @@ Un proyecto C++23 para algoritmos combinatorios usando Boost::multiprecision y C
 - **Funciones matemáticas constexpr**: Factorial, combinaciones, permutaciones
 - **Constantes precalculadas**: Factoriales hasta 20!, potencias de 2, Fibonacci
 
+### 📊 Sistema I/O Unificado para Multiprecisión ⭐
+- **Interfaz unificada**: API única para `__int128` y tipos Boost.Multiprecision
+- **Detección automática**: Templates que funcionan con cualquier tipo de precisión arbitraria
+- **Conversión bidireccional**: String ↔ números con manejo robusto de errores
+- **Múltiples formatos**: Decimal, hexadecimal, binario, octal con prefijos automáticos
+- **Formateo avanzado**: Separadores de miles, conteo de dígitos, validación
+- **Compatible C++14/17**: Funciona con y sin Boost.Multiprecision instalado
+
 ### 📊 Tipos de Precisión Arbitraria
 - **Boost.Multiprecision**: `cpp_int`, `mpz_int`, `tom_int` con UDL
-- **__int128 I/O completo**: Operadores `<<`, `>>`, conversiones string
-- **Manejo de overflow**: Detección robusta de límites
+- **__int128 I/O completo**: Operadores `<<`, `>>`, conversiones string optimizadas
+- **Manejo de overflow**: Detección robusta de límites y validación de entrada
 
 ### 🧮 Algoritmos Combinatorios
 - Cálculo de factoriales con precisión arbitraria
@@ -46,13 +54,15 @@ AlgoritmiaCombinatoria/
 │   ├── launch.json            # Configuración de depuración
 │   └── c_cpp_properties.json  # Propiedades IntelliSense
 ├── build/                      # Directorio de construcción
-├── include/                    # Archivos de cabecera
-│   ├── custom_literals.hpp        # Literales UDL para Boost.Multiprecision
-│   ├── constexpr_literals.hpp     # Literales constexpr optimizados  
-│   ├── int128_io.hpp              # I/O completo para __int128
-│   ├── numeric_limits.hpp         # Especializations std::numeric_limits
-│   ├── combinatorics.hpp          # Interfaz principal (legacy)
-│   └── combinatorics_impl.hpp     # Implementaciones template (legacy)
+├── include/                           # Archivos de cabecera
+│   ├── custom_literals.hpp           # Literales UDL para Boost.Multiprecision
+│   ├── constexpr_literals.hpp        # Literales constexpr optimizados  
+│   ├── int128_io.hpp                 # I/O completo para __int128
+│   ├── boost_multiprecision_io.hpp   # I/O para tipos Boost.Multiprecision ⭐
+│   ├── multiprecision_io_compatible.hpp  # Sistema I/O unificado ⭐
+│   ├── numeric_limits.hpp            # Especializations std::numeric_limits
+│   ├── combinatorics.hpp             # Interfaz principal (legacy)
+│   └── combinatorics_impl.hpp        # Implementaciones template (legacy)
 ├── src/                        # Código fuente
 │   ├── main.cpp               # Programa principal
 │   └── combinatorics.cpp      # Implementaciones

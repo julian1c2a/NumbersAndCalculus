@@ -50,6 +50,8 @@
 #include <boost/multiprecision/cpp_int.hpp>
 #include <limits>
 
+using mp = boost::multiprecision;
+
 #ifdef BOOST_HAS_TOMMATH
 #include <boost/multiprecision/tommath.hpp>
 #endif
@@ -105,7 +107,7 @@ namespace std {
  * cpp_int es un tipo de precisión arbitraria implementado en C++ puro.
  * No tiene límites fijos y puede crecer dinámicamente según sea necesario.
  */
-template <> class numeric_limits<boost::multiprecision::cpp_int> {
+template <> class numeric_limits<mp::cpp_int> {
 public:
   static constexpr bool is_specialized = true;
   static constexpr bool is_signed = true;
@@ -136,45 +138,31 @@ public:
   static constexpr bool tinyness_before = false;
 
   /// @brief No hay mínimo para precisión arbitraria
-  static constexpr boost::multiprecision::cpp_int min() noexcept { return 0; }
+  static constexpr mp::cpp_int min() noexcept { return 0; }
 
   /// @brief No hay máximo para precisión arbitraria
-  static constexpr boost::multiprecision::cpp_int max() noexcept { return 0; }
+  static constexpr mp::cpp_int max() noexcept { return 0; }
 
   /// @brief Valor más pequeño mayor que cero (siempre 1 para enteros)
-  static constexpr boost::multiprecision::cpp_int lowest() noexcept {
-    return 0;
-  }
+  static constexpr mp::cpp_int lowest() noexcept { return 0; }
 
   /// @brief Precisión de máquina (no aplicable)
-  static constexpr boost::multiprecision::cpp_int epsilon() noexcept {
-    return 0;
-  }
+  static constexpr mp::cpp_int epsilon() noexcept { return 0; }
 
   /// @brief Error de redondeo (no aplicable para enteros exactos)
-  static constexpr boost::multiprecision::cpp_int round_error() noexcept {
-    return 0;
-  }
+  static constexpr mp::cpp_int round_error() noexcept { return 0; }
 
   /// @brief No tiene infinito
-  static constexpr boost::multiprecision::cpp_int infinity() noexcept {
-    return 0;
-  }
+  static constexpr mp::cpp_int infinity() noexcept { return 0; }
 
   /// @brief No tiene NaN silencioso
-  static constexpr boost::multiprecision::cpp_int quiet_NaN() noexcept {
-    return 0;
-  }
+  static constexpr mp::cpp_int quiet_NaN() noexcept { return 0; }
 
   /// @brief No tiene NaN que señala
-  static constexpr boost::multiprecision::cpp_int signaling_NaN() noexcept {
-    return 0;
-  }
+  static constexpr mp::cpp_int signaling_NaN() noexcept { return 0; }
 
   /// @brief Número denormalizado más pequeño (no aplicable)
-  static constexpr boost::multiprecision::cpp_int denorm_min() noexcept {
-    return 0;
-  }
+  static constexpr mp::cpp_int denorm_min() noexcept { return 0; }
 };
 
 #ifdef BOOST_HAS_TOMMATH
@@ -188,7 +176,7 @@ public:
  * tom_int usa la biblioteca libtommath como backend y proporciona
  * aritmética de precisión arbitraria con mejor rendimiento que cpp_int.
  */
-template <> class numeric_limits<boost::multiprecision::tom_int> {
+template <> class numeric_limits<mp::tom_int> {
 public:
   static constexpr bool is_specialized = true;
   static constexpr bool is_signed = true;
@@ -216,29 +204,15 @@ public:
   static constexpr bool traps = false;
   static constexpr bool tinyness_before = false;
 
-  static constexpr boost::multiprecision::tom_int min() noexcept { return 0; }
-  static constexpr boost::multiprecision::tom_int max() noexcept { return 0; }
-  static constexpr boost::multiprecision::tom_int lowest() noexcept {
-    return 0;
-  }
-  static constexpr boost::multiprecision::tom_int epsilon() noexcept {
-    return 0;
-  }
-  static constexpr boost::multiprecision::tom_int round_error() noexcept {
-    return 0;
-  }
-  static constexpr boost::multiprecision::tom_int infinity() noexcept {
-    return 0;
-  }
-  static constexpr boost::multiprecision::tom_int quiet_NaN() noexcept {
-    return 0;
-  }
-  static constexpr boost::multiprecision::tom_int signaling_NaN() noexcept {
-    return 0;
-  }
-  static constexpr boost::multiprecision::tom_int denorm_min() noexcept {
-    return 0;
-  }
+  static constexpr mp::tom_int min() noexcept { return 0; }
+  static constexpr mp::tom_int max() noexcept { return 0; }
+  static constexpr mp::tom_int lowest() noexcept { return 0; }
+  static constexpr mp::tom_int epsilon() noexcept { return 0; }
+  static constexpr mp::tom_int round_error() noexcept { return 0; }
+  static constexpr mp::tom_int infinity() noexcept { return 0; }
+  static constexpr mp::tom_int quiet_NaN() noexcept { return 0; }
+  static constexpr mp::tom_int signaling_NaN() noexcept { return 0; }
+  static constexpr mp::tom_int denorm_min() noexcept { return 0; }
 };
 #endif // BOOST_HAS_TOMMATH
 
@@ -253,7 +227,7 @@ public:
  * mpz_int usa la biblioteca GMP (GNU Multiple Precision) como backend,
  * ofreciendo el mejor rendimiento para operaciones de precisión arbitraria.
  */
-template <> class numeric_limits<boost::multiprecision::mpz_int> {
+template <> class numeric_limits<mp::mpz_int> {
 public:
   static constexpr bool is_specialized = true;
   static constexpr bool is_signed = true;
@@ -281,29 +255,15 @@ public:
   static constexpr bool traps = false;
   static constexpr bool tinyness_before = false;
 
-  static constexpr boost::multiprecision::mpz_int min() noexcept { return 0; }
-  static constexpr boost::multiprecision::mpz_int max() noexcept { return 0; }
-  static constexpr boost::multiprecision::mpz_int lowest() noexcept {
-    return 0;
-  }
-  static constexpr boost::multiprecision::mpz_int epsilon() noexcept {
-    return 0;
-  }
-  static constexpr boost::multiprecision::mpz_int round_error() noexcept {
-    return 0;
-  }
-  static constexpr boost::multiprecision::mpz_int infinity() noexcept {
-    return 0;
-  }
-  static constexpr boost::multiprecision::mpz_int quiet_NaN() noexcept {
-    return 0;
-  }
-  static constexpr boost::multiprecision::mpz_int signaling_NaN() noexcept {
-    return 0;
-  }
-  static constexpr boost::multiprecision::mpz_int denorm_min() noexcept {
-    return 0;
-  }
+  static constexpr mp::mpz_int min() noexcept { return 0; }
+  static constexpr mp::mpz_int max() noexcept { return 0; }
+  static constexpr mp::mpz_int lowest() noexcept { return 0; }
+  static constexpr mp::mpz_int epsilon() noexcept { return 0; }
+  static constexpr mp::mpz_int round_error() noexcept { return 0; }
+  static constexpr mp::mpz_int infinity() noexcept { return 0; }
+  static constexpr mp::mpz_int quiet_NaN() noexcept { return 0; }
+  static constexpr mp::mpz_int signaling_NaN() noexcept { return 0; }
+  static constexpr mp::mpz_int denorm_min() noexcept { return 0; }
 };
 #endif // BOOST_HAS_GMP
 
@@ -316,7 +276,7 @@ public:
  *
  * Entero de 128 bits con signo, de tamaño fijo.
  */
-template <> class numeric_limits<boost::multiprecision::int128_t> {
+template <> class numeric_limits<mp::int128_t> {
 public:
   static constexpr bool is_specialized = true;
   static constexpr bool is_signed = true;
@@ -346,38 +306,24 @@ public:
   static constexpr bool tinyness_before = false;
 
   /// @brief Valor mínimo representable (-2^127)
-  static constexpr boost::multiprecision::int128_t min() noexcept {
-    return boost::multiprecision::int128_t(-1) << 127;
+  static constexpr mp::int128_t min() noexcept {
+    return mp::int128_t(-1) << 127;
   }
 
   /// @brief Valor máximo representable (2^127 - 1)
-  static constexpr boost::multiprecision::int128_t max() noexcept {
-    return (boost::multiprecision::int128_t(1) << 127) - 1;
+  static constexpr mp::int128_t max() noexcept {
+    return (mp::int128_t(1) << 127) - 1;
   }
 
   /// @brief Mismo que min() para enteros
-  static constexpr boost::multiprecision::int128_t lowest() noexcept {
-    return min();
-  }
+  static constexpr mp::int128_t lowest() noexcept { return min(); }
 
-  static constexpr boost::multiprecision::int128_t epsilon() noexcept {
-    return 0;
-  }
-  static constexpr boost::multiprecision::int128_t round_error() noexcept {
-    return 0;
-  }
-  static constexpr boost::multiprecision::int128_t infinity() noexcept {
-    return 0;
-  }
-  static constexpr boost::multiprecision::int128_t quiet_NaN() noexcept {
-    return 0;
-  }
-  static constexpr boost::multiprecision::int128_t signaling_NaN() noexcept {
-    return 0;
-  }
-  static constexpr boost::multiprecision::int128_t denorm_min() noexcept {
-    return 0;
-  }
+  static constexpr mp::int128_t epsilon() noexcept { return 0; }
+  static constexpr mp::int128_t round_error() noexcept { return 0; }
+  static constexpr mp::int128_t infinity() noexcept { return 0; }
+  static constexpr mp::int128_t quiet_NaN() noexcept { return 0; }
+  static constexpr mp::int128_t signaling_NaN() noexcept { return 0; }
+  static constexpr mp::int128_t denorm_min() noexcept { return 0; }
 };
 
 /**
@@ -385,8 +331,7 @@ public:
  *
  * Entero de 128 bits sin signo, de tamaño fijo.
  */
-template <> class numeric_limits<boost::multiprecision::uint128_t> {
-  using mp = boost::multiprecision;
+template <> class numeric_limits<mp::uint128_t> {
 
 public:
   static constexpr bool is_specialized = true;
@@ -589,8 +534,6 @@ public:
 //==============================================================================
 
 namespace numeric_limits_extensions {
-
-using mp = boost::multiprecision;
 
 // Especializaciones del trait is_arbitrary_precision
 template <> struct is_arbitrary_precision<mp::cpp_int> : std::true_type {};

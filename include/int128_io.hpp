@@ -7,6 +7,10 @@
  *
  * Este archivo define operadores de entrada/salida y funciones de conversión
  * de strings para tipos __int128 y unsigned __int128.
+ *
+ * @see boost_multiprecision_io.hpp - Funciones similares para
+ * Boost.Multiprecision
+ * @note Para tipos Boost.Multiprecision, usar boost_multiprecision_io.hpp
  */
 
 #pragma once
@@ -17,7 +21,6 @@
 #include <sstream>
 #include <stdexcept>
 #include <string>
-
 
 //==============================================================================
 // NAMESPACE PARA FUNCIONES DE I/O DE __INT128
@@ -126,7 +129,7 @@ inline std::string to_string(unsigned __int128 value) {
  * @deprecated Considerar usar to_string() en su lugar
  */
 [[deprecated("Use to_string() instead")]]
-inline char *to_cstr(__int128 value) {
+inline constexpr char *to_cstr(__int128 value) {
   std::string str = to_string(value);
   char *result = new char[str.length() + 1];
   std::strcpy(result, str.c_str());

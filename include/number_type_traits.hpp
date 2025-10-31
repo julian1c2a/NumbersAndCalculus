@@ -176,7 +176,7 @@ concept nonstd_infty_integral = false;
  * Facilita el acceso a los tipos de Boost::multiprecision sin repetir
  * todo el namespace completo.
  */
-namespace mp_int =
+namespace mp =
     boost::multiprecision; /**
                             * @brief Alias legible para enteros de precisión
                             * arbitraria con backend C++
@@ -185,7 +185,7 @@ namespace mp_int =
                             * precisión arbitraria. Es portable pero puede ser
                             * más lenta que GMP/tommath.
                             */
-using cpp_int_t = mp_int::cpp_int;
+using cpp_int_t = mp::cpp_int;
 
 /**
  * @brief Alias legible para enteros de precisión arbitraria con backend tommath
@@ -193,7 +193,7 @@ using cpp_int_t = mp_int::cpp_int;
  * tom_int: Usa la biblioteca libtommath como backend. Más rápida que cpp_int
  * pero requiere enlazar con la biblioteca externa.
  */
-using tom_int_t = mp_int::tom_int;
+using tom_int_t = mp::tom_int;
 
 /**
  * @brief Alias legible para enteros de precisión arbitraria con backend GMP
@@ -201,7 +201,7 @@ using tom_int_t = mp_int::tom_int;
  * mpz_int: Usa la biblioteca GMP (GNU Multiple Precision). La más rápida
  * para operaciones complejas pero requiere enlazar con GMP.
  */
-using mpz_int_t = mp_int::mpz_int;
+using mpz_int_t = mp::mpz_int;
 
 //==============================================================================
 // CONCEPTS PARA TIPOS BOOST.MULTIPRECISION
@@ -227,16 +227,12 @@ using mpz_int_t = mp_int::mpz_int;
  */
 template <typename T>
 concept boost_integral =
-    std::is_same_v<T, mp_int::int1024_t> ||
-    std::is_same_v<T, mp_int::uint1024_t> ||
-    std::is_same_v<T, mp_int::int512_t> ||
-    std::is_same_v<T, mp_int::uint512_t> ||
-    std::is_same_v<T, mp_int::int256_t> ||
-    std::is_same_v<T, mp_int::uint256_t> ||
-    std::is_same_v<T, mp_int::int128_t> ||
-    std::is_same_v<T, mp_int::uint128_t> ||
-    std::is_same_v<T, mp_int::mpz_int> || std::is_same_v<T, mp_int::cpp_int> ||
-    std::is_same_v<T, mp_int::tom_int>;
+    std::is_same_v<T, mp::int1024_t> || std::is_same_v<T, mp::uint1024_t> ||
+    std::is_same_v<T, mp::int512_t> || std::is_same_v<T, mp::uint512_t> ||
+    std::is_same_v<T, mp::int256_t> || std::is_same_v<T, mp::uint256_t> ||
+    std::is_same_v<T, mp::int128_t> || std::is_same_v<T, mp::uint128_t> ||
+    std::is_same_v<T, mp::mpz_int> || std::is_same_v<T, mp::cpp_int> ||
+    std::is_same_v<T, mp::tom_int>;
 
 /**
  * @brief Concept para tipos enteros con signo de Boost.Multiprecision
@@ -248,11 +244,10 @@ concept boost_integral =
  */
 template <typename T>
 concept boost_signed_integral =
-    std::is_same_v<T, mp_int::int1024_t> ||
-    std::is_same_v<T, mp_int::int512_t> ||
-    std::is_same_v<T, mp_int::int256_t> ||
-    std::is_same_v<T, mp_int::int128_t> || std::is_same_v<T, mp_int::mpz_int> ||
-    std::is_same_v<T, mp_int::cpp_int> || std::is_same_v<T, mp_int::tom_int>;
+    std::is_same_v<T, mp::int1024_t> || std::is_same_v<T, mp::int512_t> ||
+    std::is_same_v<T, mp::int256_t> || std::is_same_v<T, mp::int128_t> ||
+    std::is_same_v<T, mp::mpz_int> || std::is_same_v<T, mp::cpp_int> ||
+    std::is_same_v<T, mp::tom_int>;
 
 /**
  * @brief Concept para tipos enteros sin signo de Boost.Multiprecision
@@ -280,8 +275,8 @@ concept boost_unsigned_integral =
  */
 template <typename T>
 concept boost_finite_integral =
-    boost_integral<T> && !std::is_same_v<T, mp_int::mpz_int> &&
-    !std::is_same_v<T, mp_int::cpp_int> && !std::is_same_v<T, mp_int::tom_int>;
+    boost_integral<T> && !std::is_same_v<T, mp::mpz_int> &&
+    !std::is_same_v<T, mp::cpp_int> && !std::is_same_v<T, mp::tom_int>;
 
 /**
  * @brief Concept para tipos Boost de precisión arbitraria (infinita)
@@ -307,8 +302,8 @@ concept boost_finite_integral =
  */
 template <typename T>
 concept boost_infty_integral =
-    std::is_same_v<T, mp_int::mpz_int> || std::is_same_v<T, mp_int::cpp_int> ||
-    std::is_same_v<T, mp_int::tom_int>;
+    std::is_same_v<T, mp::mpz_int> || std::is_same_v<T, mp::cpp_int> ||
+    std::is_same_v<T, mp::tom_int>;
 
 } // namespace integral_type_traits_impl
 
@@ -347,7 +342,6 @@ concept boost_infty_integral =
  */
 namespace integral_type_traits {
 
-using namespace boost::multiprecision;
 using namespace integral_type_traits_impl;
 
 /**
