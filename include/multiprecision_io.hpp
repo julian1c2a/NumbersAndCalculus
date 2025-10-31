@@ -15,6 +15,8 @@
 #include "boost_multiprecision_io.hpp"
 #include "int128_io.hpp"
 #include "multiprecision_io_compatible.hpp"
+using namespace multiprecision_io_compat;
+using namespace mp; // Namespace simplificado
 
 //==============================================================================
 // NAMESPACE UNIFICADO PARA I/O DE MULTIPRECISIÓN
@@ -26,6 +28,30 @@ namespace multiprecision_io {
 using namespace int128_io;
 using namespace mp; // Cambio de boost_mp_io a mp
 using namespace multiprecision_io_compat;
+
+// Tipos enteros de precisión extendida
+using int128_t =
+    number<cpp_int_backend<128, 128, signed_magnitude, unchecked, void>>;
+using uint128_t =
+    number<cpp_int_backend<128, 128, unsigned_magnitude, unchecked, void>>;
+using int256_t =
+    number<cpp_int_backend<256, 256, signed_magnitude, unchecked, void>>;
+using uint256_t =
+    number<cpp_int_backend<256, 256, unsigned_magnitude, unchecked, void>>;
+using int512_t =
+    number<cpp_int_backend<512, 512, signed_magnitude, unchecked, void>>;
+using uint512_t =
+    number<cpp_int_backend<512, 512, unsigned_magnitude, unchecked, void>>;
+using int1024_t =
+    number<cpp_int_backend<1024, 1024, signed_magnitude, unchecked, void>>;
+using uint1024_t =
+    number<cpp_int_backend<1024, 1024, unsigned_magnitude, unchecked, void>>;
+
+// Tipos de punto flotante de precisión extendida
+using cpp_dec_float_50 = cpp_dec_float<50>;    // 50 dígitos decimales
+using cpp_dec_float_100 = cpp_dec_float<100>;  // 100 dígitos decimales
+using cpp_bin_float_quad = cpp_bin_float_quad; // Precisión cuádruple
+using cpp_bin_float_oct = cpp_bin_float_oct;   // Precisión óctuple
 
 //------------------------------------------------------------------------------
 // FUNCIONES TEMPLATE GENÉRICAS PARA CUALQUIER TIPO
@@ -277,3 +303,30 @@ int main() {
 }
 
 #endif // MULTIPRECISION_IO_EXAMPLE
+
+//==============================================================================
+// EJEMPLO ADICIONAL: USO DE TIPOS DE PRECISIÓN ARBITRARIA Y FIJA
+//==============================================================================
+
+#ifdef MULTIPRECISION_IO_ADDITIONAL_EXAMPLE
+
+#include <iostream>
+
+int main() {
+  // Tipos de precisión arbitraria
+  cpp_int unlimited("123456789012345678901234567890");
+
+  // Tipos de precisión fija
+  int256_t fixed_256("98765432109876543210987654321098765432109876543210");
+  uint512_t fixed_512(
+      "123456789012345678901234567890123456789012345678901234567890");
+
+  // Una sola API para todos
+  std::cout << universal_to_string(unlimited) << std::endl;
+  std::cout << universal_to_string(fixed_256) << std::endl;
+  std::cout << universal_format_thousands(fixed_512, ',') << std::endl;
+
+  return 0;
+}
+
+#endif // MULTIPRECISION_IO_ADDITIONAL_EXAMPLE
