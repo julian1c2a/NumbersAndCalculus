@@ -1,6 +1,7 @@
 #include "simplified_power_tables_cpp14.hpp"
 #include <cassert>
 #include <chrono>
+#include <cmath> // Para std::sqrt y std::log
 #include <cstdint>
 #include <iostream>
 #include <random>
@@ -162,6 +163,30 @@ void constexpr_compilation_test() {
   assert(c6 == 33554432);
 
   std::cout << "✅ Todos los valores constexpr son correctos\n";
+}
+
+enum class CalculationError {
+  None = 0,
+  OutOfRange,    // Parámetro fuera del rango válido
+  DomainError,   // Valor fuera del dominio de la función matemática ⭐ NUEVO
+  Overflow,      // Overflow aritmético
+  Underflow,     // Underflow aritmético
+  InvalidInput,  // Entrada inválida (formato incorrecto, null, etc.)
+  DivisionByZero // División por cero
+};
+
+// Para raíz cuadrada de números negativos
+DetailedResult safe_sqrt(double x) noexcept {
+  if (x < 0.0)
+    return {std::nullopt, CalculationError::DomainError};
+  return {{std::sqrt(x)}, CalculationError::None};
+}
+
+// Para logaritmo de números no positivos
+DetailedResult safe_log(double x) noexcept {
+  if (x <= 0.0)
+    return {std::nullopt, CalculationError::DomainError};
+  return {{std::log(x)}, CalculationError::None};
 }
 
 int main() {

@@ -13,10 +13,7 @@
  * std::is_integral, std::is_signed, etc.
  */
 
-#include "number_calc.hpp"
 #include <type_traits>
-
-using namespace number_calc;
 
 namespace number_calc {
 namespace type_traits {
@@ -117,8 +114,8 @@ template <typename T> constexpr bool is_valid_unsigned_type() noexcept {
 } // namespace number_calc
 
 // Función inteligente (recomendada)
-int result = int_power_smart(2, 10); // Usa optimización bit-shifting
+// int result = int_power_smart(2, 10); // Usa optimización bit-shifting
 
 // Funciones específicas
-auto pow2 = int_power_2<int>(20);            // Especializada para 2^n
-auto [res, ok] = int_power_safe_pair(3, 15); // Con verificación
+// auto pow2 = int_power_2<int>(20);            // Especializada para 2^n
+// auto [res, ok] = int_power_safe_pair(3, 15); // Con verificación

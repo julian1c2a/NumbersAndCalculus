@@ -20,7 +20,6 @@
 #include <cstdint>
 #include <optional>
 
-
 namespace number_calc {
 namespace error_handling {
 
@@ -34,9 +33,10 @@ constexpr std::array<int8_t, 7> power_of_2_int8 = {1, 2, 4, 8, 16, 32, 64};
 enum class CalculationError {
   None = 0,      ///< Sin error
   OutOfRange,    ///< Parámetro fuera del rango válido
+  DomainError,   ///< Valor fuera del dominio de la función matemática
   Overflow,      ///< Overflow aritmético
   Underflow,     ///< Underflow aritmético
-  InvalidInput,  ///< Entrada inválida
+  InvalidInput,  ///< Entrada inválida (formato incorrecto, null, etc.)
   DivisionByZero ///< División por cero
 };
 
@@ -49,6 +49,8 @@ constexpr const char *error_to_string(CalculationError error) noexcept {
     return "No error";
   case CalculationError::OutOfRange:
     return "Out of range";
+  case CalculationError::DomainError:
+    return "Domain error";
   case CalculationError::Overflow:
     return "Overflow";
   case CalculationError::Underflow:
@@ -98,6 +100,17 @@ constexpr const char *error_to_string(CalculationError error) noexcept {
  *     if (b == 0) return {std::nullopt, CalculationError::DivisionByZero};
  *     if (a > INT_MAX / b) return {std::nullopt, CalculationError::Overflow};
  *     return {{a / b}, CalculationError::None};
+ * }
+ *
+ * // Ejemplo de uso de DomainError para funciones matemáticas:
+ * DetailedResult safe_sqrt(double x) noexcept {
+ *     if (x < 0.0) return {std::nullopt, CalculationError::DomainError};
+ *     return {{std::sqrt(x)}, CalculationError::None};
+ * }
+ *
+ * DetailedResult safe_log(double x) noexcept {
+ *     if (x <= 0.0) return {std::nullopt, CalculationError::DomainError};
+ *     return {{std::log(x)}, CalculationError::None};
  * }
  * @endcode
  */

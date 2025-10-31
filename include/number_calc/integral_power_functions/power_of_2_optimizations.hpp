@@ -15,6 +15,7 @@
 #include "lookup_tables/power_of_2_lookup_tables.hpp"
 #include "trait_based_specializations.hpp"
 #include <cstdint>
+#include <limits>
 
 namespace number_calc {
 namespace integral_power_functions {
@@ -26,7 +27,69 @@ using namespace number_calc::type_traits;
 //==============================================================================
 
 /**
- * @brief Función altamente optimizada para potencias de 2 con tablas constexpr
+ * @brief Optimización para tipos grandes usando resultado de 32 bits como base
+ * @tparam T Tipo entero grande (> 32 bits)
+ * @tparam U Tipo del exponente
+ * @param exp Exponente (2^exp)
+ * @return 2^exp optimizado para tipos grandes
+ *
+ * Estrategia: Si exp > 32, calcular 2^32 y usar como base para reducir
+ * iteraciones. Por ejemplo: 2^100 = (2^32)^3 * 2^4, reduciendo de 100 a 3
+ * iteraciones principales.
+ */
+template <typename T, typename U>
+constexpr T int_power_2_large_optimized(U exp) noexcept {
+  static_assert(sizeof(T) > sizeof(uint32_t),
+                "Esta optimización es solo para tipos > 32 bits");
+  static_assert(is_integral_extended_v<T>, "T debe ser un tipo integral");
+  static_assert(is_integral_extended_v<U>, "U debe ser un tipo integral");
+
+  // Casos triviales
+  if (exp == 0)
+    return T{1};
+  if (exp == 1)
+    return T{2};
+
+  // Para exponentes pequeños, usar desplazamiento directo
+  if (exp < 64) {
+    return T{1} << exp;
+  }
+
+  // OPTIMIZACIÓN CLAVE: Para exponentes grandes, partir del máximo de 32 bits
+  constexpr U max_32bit_exp = is_signed_extended_v<T> ? 30 : 31;
+  constexpr T power_32_base = T{1} << max_32bit_exp; // 2^30 o 2^31
+
+  if (exp <= max_32bit_exp) {
+    return T{1} << exp;
+  }
+
+  // Calcular cuántas veces cabe max_32bit_exp en exp
+  U quotient = exp / max_32bit_exp;
+  U remainder = exp % max_32bit_exp;
+
+  // Resultado = (2^max_32bit_exp)^quotient * 2^remainder
+  T result = T{1};
+  T base_32 = power_32_base;
+
+  // Exponenciación binaria para (2^max_32bit_exp)^quotient
+  while (quotient > 0) {
+    if (quotient & 1) {
+      result *= base_32;
+    }
+    base_32 *= base_32;
+    quotient >>= 1;
+  }
+
+  // Multiplicar por 2^remainder
+  if (remainder > 0) {
+    result *= (T{1} << remainder);
+  }
+
+  return result;
+}
+
+/**
+ * @brief Función altamente optimizada para potencias de 2
  * @tparam T Tipo entero de retorno
  * @tparam U Tipo del exponente
  * @param exp Exponente (2^exp)
@@ -35,7 +98,9 @@ using namespace number_calc::type_traits;
  * OPTIMIZACIONES POR TIPO:
  * - int8_t/uint8_t/int16_t/uint16_t: Tablas constexpr precalculadas
  * - Tipos medianos: Desplazamiento de bits
- * - Tipos grandes: Fallback a algoritmo general
+ * - Tipos grandes (>32 bits): Optimización usando base de 32 bits como punto de
+ * partida
+ * - Fallback: Algoritmo general para casos extremos
  */
 template <typename T, typename U> constexpr T int_power_2(U exp) noexcept {
   static_assert(is_integral_extended_v<T>, "T debe ser un tipo integral");
@@ -90,7 +155,13 @@ template <typename T, typename U> constexpr T int_power_2(U exp) noexcept {
 #endif
   }
 
-  // OPTIMIZACIÓN NIVEL 3: Fallback para tipos grandes o exponentes grandes
+  // OPTIMIZACIÓN NIVEL 3: Para tipos muy grandes, usar resultado de 32 bits
+  // como base
+  if constexpr (sizeof(T) > sizeof(uint32_t)) {
+    return int_power_2_large_optimized<T>(exp);
+  }
+
+  // OPTIMIZACIÓN NIVEL 4: Fallback para casos restantes
   return int_power_dispatch(T{2}, exp);
 } //==============================================================================
 // FUNCIONES DE DETECCIÓN AUTOMÁTICA
@@ -164,7 +235,17 @@ template <typename T> constexpr int find_power_of_2_exponent(T base) noexcept {
 }
 
 //==============================================================================
-// FUNCIÓN INTELIGENTE CON DETECCIÓN AUTOMÁTICA AVANZADA
+// DECLARACIÓN ADELANTADA PARA OPTIMIZACIÓN DE TIPOS GRANDES
+//==============================================================================
+
+/**
+ * @brief Declaración adelantada para optimización de tipos grandes
+ */
+template <typename T, typename U>
+constexpr T int_power_large_optimized(T base, U exp) noexcept;
+
+//==============================================================================
+// FUNCIÓN INTELIGENTE CON DETECCIÓN AUTOMÁTICA DE OPTIMIZACIONES
 //==============================================================================
 
 /**
@@ -221,8 +302,99 @@ constexpr T int_power_smart(T base, U exp) noexcept {
     }
   }
 
-  // OPTIMIZACIÓN NIVEL 4: Dispatch normal por traits
+  // OPTIMIZACIÓN NIVEL 4: Para tipos grandes (>64 bits), usar resultado de 32
+  // bits como base
+  if constexpr (sizeof(T) > sizeof(uint64_t)) {
+    return int_power_large_optimized(base, exp);
+  }
+
+  // OPTIMIZACIÓN NIVEL 5: Dispatch normal por traits
   return int_power_dispatch(base, exp);
+}
+
+//==============================================================================
+// OPTIMIZACIÓN GENERAL PARA TIPOS GRANDES
+//==============================================================================
+
+/**
+ * @brief Optimización general para tipos grandes usando potencias de 32 bits
+ * como base
+ * @tparam T Tipo entero grande (> 64 bits)
+ * @tparam U Tipo del exponente
+ * @param base Base de la potencia
+ * @param exp Exponente
+ * @return base^exp optimizado para tipos grandes
+ *
+ * Estrategia: Si exp es grande, calcular potencias intermedias usando tipos más
+ * pequeños y usar esos resultados como punto de partida para reducir
+ * iteraciones.
+ *
+ * Ejemplo: Para calcular 3^100 en __int128:
+ * 1. Calcular 3^32 usando uint32_t (más eficiente)
+ * 2. Usar 3^32 como nueva base: (3^32)^3 * 3^4
+ * 3. Reducir de 100 iteraciones a 3 iteraciones principales
+ */
+template <typename T, typename U>
+constexpr T int_power_large_optimized(T base, U exp) noexcept {
+  static_assert(sizeof(T) > sizeof(uint64_t),
+                "Esta optimización es solo para tipos > 64 bits");
+  static_assert(is_integral_extended_v<T>, "T debe ser un tipo integral");
+  static_assert(is_integral_extended_v<U>, "U debe ser un tipo integral");
+
+  // Casos triviales
+  if (exp == 0)
+    return T{1};
+  if (exp == 1)
+    return base;
+  if (base == 0)
+    return T{0};
+  if (base == 1)
+    return T{1};
+
+  // Para exponentes pequeños, usar algoritmo normal
+  if (exp <= 32) {
+    return int_power_dispatch(base, exp);
+  }
+
+  // OPTIMIZACIÓN CLAVE: Partir del resultado de 32 bits
+  constexpr U chunk_size = 32;
+
+  // Calcular base^chunk_size usando tipo más pequeño si es posible
+  T base_chunk;
+  if (base <= std::numeric_limits<uint32_t>::max()) {
+    // Si la base cabe en uint32_t, usar esa optimización
+    uint32_t base_32 = static_cast<uint32_t>(base);
+    uint32_t result_32 = int_power_dispatch(base_32, chunk_size);
+    base_chunk = static_cast<T>(result_32);
+  } else {
+    // Si la base es muy grande, calcular directamente
+    base_chunk = int_power_dispatch(base, chunk_size);
+  }
+
+  // Descomponer el exponente: exp = quotient * chunk_size + remainder
+  U quotient = exp / chunk_size;
+  U remainder = exp % chunk_size;
+
+  // Resultado = (base^chunk_size)^quotient * base^remainder
+  T result = T{1};
+  T current_base_chunk = base_chunk;
+
+  // Exponenciación binaria para (base^chunk_size)^quotient
+  while (quotient > 0) {
+    if (quotient & 1) {
+      result *= current_base_chunk;
+    }
+    current_base_chunk *= current_base_chunk;
+    quotient >>= 1;
+  }
+
+  // Multiplicar por base^remainder
+  if (remainder > 0) {
+    T remainder_result = int_power_dispatch(base, remainder);
+    result *= remainder_result;
+  }
+
+  return result;
 }
 
 } // namespace integral_power_functions

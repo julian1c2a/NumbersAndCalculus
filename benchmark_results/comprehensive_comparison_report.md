@@ -1,13 +1,13 @@
 # Reporte de Comparación: CalculationResult vs std::optional
 
-**Generado:** 20251031_155954
+**Generado:** 20251031_161557
 
 ## Resumen de Comparaciones
 
 - **Total de comparaciones:** 2
-- **std::optional gana:** 2 tests
-- **CalculationResult gana:** 0 tests
-- **Speedup promedio:** 1.02x
+- **std::optional gana:** 1 tests
+- **CalculationResult gana:** 1 tests
+- **Speedup promedio:** 0.95x
 
 ## Comparaciones Detalladas
 
@@ -15,8 +15,8 @@
 
 | Métrica | CalculationResult | std::optional | Ratio |
 |---------|-------------------|---------------|-------|
-| Avg Time (ns) | 29.366 | 28.788 | 1.02x |
-| Ops/Second | 34053218 | 34736454 | 0.98x |
+| Avg Time (ns) | 30.494 | 30.474 | 1.00x |
+| Ops/Second | 32792906 | 32815073 | 1.00x |
 | Success Rate | 99.5% | 99.5% | - |
 
 **🤝 Empate técnico** - Diferencia < 5%
@@ -25,20 +25,19 @@
 
 | Métrica | CalculationResult | std::optional | Ratio |
 |---------|-------------------|---------------|-------|
-| Avg Time (ns) | 29.294 | 28.788 | 1.02x |
-| Ops/Second | 34136916 | 34736454 | 0.98x |
-| Success Rate | 63.6% | 99.5% | - |
+| Avg Time (ns) | 27.302 | 30.474 | 0.90x |
+| Ops/Second | 36627621 | 32815073 | 1.12x |
+| Success Rate | 63.8% | 99.5% | - |
 
-**🤝 Empate técnico** - Diferencia < 5%
+**🏆 Winner: CalculationResult** - 11.6% más rápido
 
 ## Recomendaciones
 
-✅ **Recomendación: Migrar a std::optional**
+🤝 **Recomendación: Migración basada en mantenibilidad**
 
-std::optional demuestra mejor rendimiento en la mayoría de casos de prueba. Además, ofrece ventajas adicionales:
+Rendimiento similar en ambos sistemas. La decisión debe basarse en:
 
-- Estándar C++17 reconocido
-- Mejor soporte de herramientas
-- Sintaxis más limpia
-- Menos código que mantener
+- Preferir std::optional por ser estándar
+- Considerar el costo de migración
+- Evaluar la experiencia del equipo
 
