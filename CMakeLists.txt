@@ -58,6 +58,20 @@ else()
         GIT_TAG        v3.4.0
     )
     FetchContent_MakeAvailable(Catch2)
+    
+    # Suprimir warnings específicos para Catch2 (dependencia externa)
+    if(TARGET Catch2)
+        target_compile_options(Catch2 PRIVATE
+            $<$<CXX_COMPILER_ID:GNU>:-Wno-deprecated-literal-operator>
+            $<$<CXX_COMPILER_ID:Clang>:-Wno-deprecated-literal-operator>
+        )
+    endif()
+    if(TARGET Catch2WithMain)
+        target_compile_options(Catch2WithMain PRIVATE
+            $<$<CXX_COMPILER_ID:GNU>:-Wno-deprecated-literal-operator>
+            $<$<CXX_COMPILER_ID:Clang>:-Wno-deprecated-literal-operator>
+        )
+    endif()
 endif()
 
 # Incluir directorios
