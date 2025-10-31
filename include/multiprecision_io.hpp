@@ -14,7 +14,7 @@
 // Incluir ambas librerías de I/O
 #include "boost_multiprecision_io.hpp"
 #include "int128_io.hpp"
-
+#include "multiprecision_io_compatible.hpp"
 
 //==============================================================================
 // NAMESPACE UNIFICADO PARA I/O DE MULTIPRECISIÓN
@@ -24,7 +24,8 @@ namespace multiprecision_io {
 
 // Importar todos los namespaces
 using namespace int128_io;
-using namespace boost_mp_io;
+using namespace mp; // Cambio de boost_mp_io a mp
+using namespace multiprecision_io_compat;
 
 //------------------------------------------------------------------------------
 // FUNCIONES TEMPLATE GENÉRICAS PARA CUALQUIER TIPO
@@ -222,7 +223,6 @@ inline void show_system_info() {
 
 #include <chrono>
 #include <iostream>
-
 
 int main() {
   using namespace multiprecision_io;

@@ -96,8 +96,8 @@ g++ -std=c++17 -I../include -DHAS_BOOST_AVAILABLE tu_programa.cpp -lboost_system
 #include <boost/multiprecision/cpp_int.hpp>
 #include "multiprecision_io_compatible.hpp"
 
-using namespace boost::multiprecision;
 using namespace multiprecision_io_compat;
+using namespace mp; // Namespace mp para tipos Boost.Multiprecision
 
 int main() {
     cpp_int huge_number("123456789012345678901234567890123456789012345678901234567890");
@@ -106,8 +106,61 @@ int main() {
     std::cout << "Dígitos: " << universal_count_digits(huge_number) << std::endl;
     std::cout << "Formateado: " << universal_format_thousands(huge_number, '.') << std::endl;
     
+    // Tipos de precisión fija
+    int256_t fixed_256("98765432109876543210987654321098765432109876543210");
+    std::cout << "int256_t: " << to_string(fixed_256) << std::endl;
+    std::cout << "int256_t hex: " << to_hex_string(fixed_256) << std::endl;
+    
     return 0;
 }
+```
+
+## Tipos de Precisión Fija Soportados
+
+### Enteros de Precisión Fija
+
+```cpp
+// Tipos disponibles en el namespace mp
+using int128_t = number<cpp_int_backend<128, 128, signed_magnitude, unchecked, void>>;
+using uint128_t = number<cpp_int_backend<128, 128, unsigned_magnitude, unchecked, void>>;
+using int256_t = number<cpp_int_backend<256, 256, signed_magnitude, unchecked, void>>;
+using uint256_t = number<cpp_int_backend<256, 256, unsigned_magnitude, unchecked, void>>;
+using int512_t = number<cpp_int_backend<512, 512, signed_magnitude, unchecked, void>>;
+using uint512_t = number<cpp_int_backend<512, 512, unsigned_magnitude, unchecked, void>>;
+using int1024_t = number<cpp_int_backend<1024, 1024, signed_magnitude, unchecked, void>>;
+using uint1024_t = number<cpp_int_backend<1024, 1024, unsigned_magnitude, unchecked, void>>;
+```
+
+### Punto Flotante de Precisión Fija
+
+```cpp  
+// Tipos de punto flotante decimal
+using cpp_dec_float_50 = cpp_dec_float<50>;   // 50 dígitos decimales
+using cpp_dec_float_100 = cpp_dec_float<100>; // 100 dígitos decimales
+
+// Tipos de punto flotante binario
+using cpp_bin_float_quad = cpp_bin_float_quad; // Precisión cuádruple
+using cpp_bin_float_oct = cpp_bin_float_oct;   // Precisión óctuple
+```
+
+### Funciones Template Genéricas
+
+```cpp
+// Estas funciones funcionan con cualquier tipo de precisión fija
+template<typename Backend>
+std::string to_string(const number<Backend>& value, int base = 10, bool uppercase = false);
+
+template<typename Backend>
+std::string to_hex_string(const number<Backend>& value, bool uppercase = true, bool prefix = true);
+
+template<typename Backend>
+size_t count_digits(const number<Backend>& value);
+
+template<typename Backend>
+std::string format_with_thousands_separator(const number<Backend>& value, char separator = ',');
+
+template<typename Backend>
+std::istream& safe_input(std::istream& is, number<Backend>& value);
 ```
 
 ## Ejemplos de Uso

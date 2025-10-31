@@ -40,10 +40,8 @@ namespace multiprecision_io_compat {
 using namespace int128_io;
 
 #if HAS_BOOST_MULTIPRECISION
-using namespace boost_mp_io;
-#endif
-
-//------------------------------------------------------------------------------
+using namespace mp; // Cambio de boost_mp_io a mp
+#endif //------------------------------------------------------------------------------
 // FUNCIONES GENÉRICAS CON SFINAE (C++14 compatible)
 //------------------------------------------------------------------------------
 
