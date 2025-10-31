@@ -14,7 +14,6 @@
 #include <chrono>
 #include <iostream>
 
-
 using namespace number_calc_impl;
 
 //==============================================================================
@@ -218,32 +217,168 @@ void demo_power_calculations() {
   std::cout << "✅ Demostración completada" << std::endl;
 }
 
+void test_int_power_2_specialization() {
+  std::cout << "\n=== PRUEBAS int_power_2 ESPECIALIZADA ===" << std::endl;
+
+  // Pruebas con diferentes tipos signed
+  assert(int_power_2<int>(0) == 1);
+  assert(int_power_2<int>(1) == 2);
+  assert(int_power_2<int>(2) == 4);
+  assert(int_power_2<int>(10) == 1024);
+
+  std::cout << "✅ int_power_2<int>(10) = " << int_power_2<int>(10)
+            << std::endl;
+
+  // Pruebas con long long signed
+  assert(int_power_2<long long>(0) == 1LL);
+  assert(int_power_2<long long>(20) == 1048576LL);
+
+  std::cout << "✅ int_power_2<long long>(20) = " << int_power_2<long long>(20)
+            << std::endl;
+
+  // Pruebas con tipos unsigned
+  assert(int_power_2<unsigned int>(0) == 1U);
+  assert(int_power_2<unsigned int>(10) == 1024U);
+
+  std::cout << "✅ int_power_2<unsigned int>(10) = "
+            << int_power_2<unsigned int>(10) << std::endl;
+
+  assert(int_power_2<unsigned long long>(0) == 1ULL);
+  assert(int_power_2<unsigned long long>(25) == 33554432ULL);
+
+  std::cout << "✅ int_power_2<unsigned long long>(25) = "
+            << int_power_2<unsigned long long>(25) << std::endl;
+
+#if defined(__GNUC__) || defined(__clang__)
+  // Pruebas con __int128
+  assert(int_power_2<__int128>(0) == 1);
+  assert(int_power_2<__int128>(50) ==
+         int_power(static_cast<__int128>(2), static_cast<__int128>(50)));
+
+  std::cout << "✅ int_power_2<__int128>(50) calculado correctamente"
+            << std::endl;
+
+  // Pruebas con unsigned __int128
+  assert(int_power_2<unsigned __int128>(0) == 1);
+  assert(int_power_2<unsigned __int128>(60) ==
+         int_power(static_cast<unsigned __int128>(2),
+                   static_cast<unsigned __int128>(60)));
+
+  std::cout << "✅ int_power_2<unsigned __int128>(60) calculado correctamente"
+            << std::endl;
+#endif
+
+  std::cout << "✅ Todas las pruebas de int_power_2 pasaron" << std::endl;
+}
+
+void test_signed_vs_unsigned_traits() {
+  std::cout << "\n=== PRUEBAS ESPECIALIZACIONES SIGNED VS UNSIGNED ==="
+            << std::endl;
+
+  // Casos especiales para tipos signed (manejo de -1)
+  assert(int_power(-1, 0) == 1);
+  assert(int_power(-1, 1) == -1);
+  assert(int_power(-1, 2) == 1);
+  assert(int_power(-1, 3) == -1);
+  assert(int_power(-1, 100) == 1);  // Par
+  assert(int_power(-1, 101) == -1); // Impar
+
+  std::cout << "✅ Signed: (-1)^100 = " << int_power(-1, 100) << std::endl;
+  std::cout << "✅ Signed: (-1)^101 = " << int_power(-1, 101) << std::endl;
+
+  // Casos con números negativos diferentes
+  assert(int_power(-2, 2) == 4);
+  assert(int_power(-2, 3) == -8);
+  assert(int_power(-3, 4) == 81);
+  assert(int_power(-3, 3) == -27);
+
+  std::cout << "✅ Signed: (-2)^3 = " << int_power(-2, 3) << std::endl;
+  std::cout << "✅ Signed: (-3)^4 = " << int_power(-3, 4) << std::endl;
+
+  // Para tipos unsigned, no hay casos especiales de signo
+  assert(int_power(2U, 10) == 1024U);
+  assert(int_power(3U, 5) == 243U);
+
+  std::cout << "✅ Unsigned: 2^10 = " << int_power(2U, 10) << std::endl;
+  std::cout << "✅ Unsigned: 3^5 = " << int_power(3U, 5) << std::endl;
+
+  std::cout << "✅ Todas las pruebas de signed vs unsigned pasaron"
+            << std::endl;
+}
+
+void test_new_vs_old_implementations() {
+  std::cout << "\n=== COMPARACIÓN NUEVA VS ANTIGUA IMPLEMENTACIÓN ==="
+            << std::endl;
+
+  // Comparar int_power vs int_power_new
+  for (int base = -3; base <= 5; ++base) {
+    for (int exp = 0; exp <= 10; ++exp) {
+      if (base == 0 && exp == 0)
+        continue; // Evitar 0^0 ambiguo
+
+      auto old_result = int_power(base, exp);
+      auto new_result = int_power_new(base, exp);
+
+      assert(old_result == new_result);
+    }
+  }
+
+  std::cout << "✅ int_power vs int_power_new dan resultados idénticos"
+            << std::endl;
+
+  // Casos especiales para potencias de 2
+  for (int exp = 0; exp <= 20; ++exp) {
+    assert(int_power(2, exp) == int_power_2<int>(exp));
+    assert(int_power_new(2, exp) == int_power_2<int>(exp));
+  }
+
+  std::cout
+      << "✅ Todas las implementaciones de potencias de 2 son consistentes"
+      << std::endl;
+
+  std::cout << "✅ Comparación de implementaciones completada" << std::endl;
+}
+
 //==============================================================================
 // FUNCIÓN PRINCIPAL
-//==============================================================================
+//==============================================================================int
+// main() {
+try {
+  std::cout << "=== PRUEBAS DE ESPECIALIZACIONES int_power ===" << std::endl;
 
-int main() {
-  try {
-    std::cout << "=== PRUEBAS DE ESPECIALIZACIONES int_power ===" << std::endl;
+  test_basic_functionality();
+  test_edge_cases();
+  test_overflow_detection();
+  test_int_power_2_specialization();
+  test_signed_vs_unsigned_traits();
+  test_new_vs_old_implementations();
+  benchmark_specializations();
+  demo_power_calculations();
+  std::cout << "\n=== TODAS LAS PRUEBAS COMPLETADAS EXITOSAMENTE ==="
+            << std::endl;
+  std::cout << "🎉 Las especializaciones de int_power funcionan correctamente"
+            << std::endl;
 
-    test_basic_functionality();
-    test_edge_cases();
-    test_overflow_detection();
-    benchmark_specializations();
-    demo_power_calculations();
+  return 0;
 
-    std::cout << "\n=== TODAS LAS PRUEBAS COMPLETADAS EXITOSAMENTE ==="
-              << std::endl;
-    std::cout << "🎉 Las especializaciones de int_power funcionan correctamente"
-              << std::endl;
-
-    return 0;
-
-  } catch (const std::exception &e) {
-    std::cerr << "❌ Error durante las pruebas: " << e.what() << std::endl;
-    return 1;
-  } catch (...) {
-    std::cerr << "❌ Error desconocido durante las pruebas" << std::endl;
-    return 1;
-  }
+} catch (const std::exception &e) {
+  std::cerr << "❌ Error durante las pruebas: " << e.what() << std::endl;
+  return 1;
+} catch (...) {
+  std::cerr << "❌ Error desconocido durante las pruebas" << std::endl;
+  return 1;
 }
+}
+
+// Template genérico con exponenciación binaria
+template <typename T> constexpr T int_power(T base, T exp) noexcept;
+
+// Especializaciones optimizadas:
+template <> constexpr int int_power<int>(int base, int exp) noexcept;
+template <>
+constexpr long long int_power<long long>(long long base,
+                                         long long exp) noexcept;
+template <> constexpr unsigned long long int_power<unsigned long long>(...);
+template <>
+constexpr __int128 int_power<__int128>(__int128 base, __int128 exp) noexcept;
+template <> constexpr unsigned __int128 int_power<unsigned __int128>(...);
