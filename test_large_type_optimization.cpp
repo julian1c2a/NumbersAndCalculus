@@ -28,7 +28,7 @@ template <typename Func> double measure_time_ms(Func &&func) {
 }
 
 void demonstrate_power_of_2_optimization() {
-  std::cout << "=== DEMOSTRACIÓN: OPTIMIZACIÓN PARA POTENCIAS DE 2 EN TIPOS "
+  std::cout << "=== DEMOSTRACION: OPTIMIZACION PARA POTENCIAS DE 2 EN TIPOS "
                "GRANDES ===\n";
   std::cout << std::fixed << std::setprecision(3);
 
@@ -53,7 +53,7 @@ void demonstrate_power_of_2_optimization() {
   std::cout << "  uint64_t:          " << std::setw(8) << time_64
             << " ms (desplazamiento directo)\n";
   std::cout << "  unsigned __int128: " << std::setw(8) << time_128
-            << " ms (optimización avanzada)\n";
+            << " ms (optimizacion avanzada)\n";
   std::cout << "  Speedup ratio:     " << std::setw(8) << (time_64 / time_128)
             << "x\n";
 #else
@@ -64,10 +64,10 @@ void demonstrate_power_of_2_optimization() {
 
 void demonstrate_general_optimization() {
   std::cout
-      << "\n=== DEMOSTRACIÓN: OPTIMIZACIÓN GENERAL PARA TIPOS GRANDES ===\n";
+      << "\n=== DEMOSTRACION: OPTIMIZACION GENERAL PARA TIPOS GRANDES ===\n";
   std::cout << std::fixed << std::setprecision(3);
 
-  // Ejemplo: 3^80 - un caso donde la optimización general es útil
+  // Ejemplo: 3^80 - un caso donde la optimizacion general es util
   constexpr int base = 3;
   constexpr int exp = 80;
 
@@ -75,34 +75,34 @@ void demonstrate_general_optimization() {
             << " en diferentes tipos:\n";
 
 #if defined(__GNUC__) || defined(__clang__)
-  // Comparar el método tradicional vs optimizado
+  // Comparar el metodo tradicional vs optimizado
   auto time_traditional = measure_time_ms([&]() {
-    // Simular método tradicional (sin optimización de chunking)
+    // Simular metodo tradicional (sin optimizacion de chunking)
     volatile auto result = int_power_dispatch<unsigned __int128>(base, exp);
     (void)result;
   });
 
   auto time_optimized = measure_time_ms([&]() {
-    // Usar la nueva optimización
+    // Usar la nueva optimizacion
     volatile auto result = int_power_smart<unsigned __int128>(base, exp);
     (void)result;
   });
 
-  std::cout << "  Método tradicional: " << std::setw(8) << time_traditional
+  std::cout << "  Metodo tradicional: " << std::setw(8) << time_traditional
             << " ms\n";
-  std::cout << "  Método optimizado:  " << std::setw(8) << time_optimized
+  std::cout << "  Metodo optimizado:  " << std::setw(8) << time_optimized
             << " ms\n";
   std::cout << "  Speedup ratio:      " << std::setw(8)
             << (time_traditional / time_optimized) << "x\n";
 
   // Explicar la estrategia
-  std::cout << "\n  Estrategia de optimización para " << base << "^" << exp
+  std::cout << "\n  Estrategia de optimizacion para " << base << "^" << exp
             << ":\n";
   std::cout << "    1. Calcular " << base
             << "^32 = " << int_power_smart(base, 32) << "\n";
   std::cout << "    2. Descomponer: " << exp << " = 32*2 + 16\n";
   std::cout << "    3. Resultado = (" << base << "^32)^2 * " << base << "^16\n";
-  std::cout << "    4. Reducción: de " << exp
+  std::cout << "    4. Reduccion: de " << exp
             << " iteraciones a ~2 iteraciones principales\n";
 #else
   std::cout << "  (tipos de 128 bits no disponibles en este compilador)\n";
@@ -110,7 +110,7 @@ void demonstrate_general_optimization() {
 }
 
 void show_iteration_reduction_analysis() {
-  std::cout << "\n=== ANÁLISIS: REDUCCIÓN DE ITERACIONES ===\n";
+  std::cout << "\n=== ANALISIS: REDUCCION DE ITERACIONES ===\n";
 
   struct TestCase {
     int base;
@@ -119,14 +119,14 @@ void show_iteration_reduction_analysis() {
   };
 
   TestCase cases[] = {{2, 100, "Potencia de 2 muy grande"},
-                      {3, 80, "Base pequeña, exponente grande"},
+                      {3, 80, "Base pequena, exponente grande"},
                       {5, 60, "Caso balanceado"},
                       {7, 50, "Base prima, exponente moderado"}};
 
   std::cout << std::setw(4) << "Base" << " | " << std::setw(3) << "Exp" << " | "
             << std::setw(12) << "Iter. Trad." << " | " << std::setw(12)
-            << "Iter. Optim." << " | " << std::setw(10) << "Reducción" << " | "
-            << "Descripción\n";
+            << "Iter. Optim." << " | " << std::setw(10) << "Reduccion" << " | "
+            << "Descripcion\n";
   std::cout << std::string(70, '-') << "\n";
 
   for (const auto &test : cases) {
@@ -158,8 +158,8 @@ void show_iteration_reduction_analysis() {
 }
 
 int main() {
-  std::cout << "SISTEMA DE OPTIMIZACIÓN PARA TIPOS GRANDES\n";
-  std::cout << "Implementación de la estrategia: usar resultados de 32 bits "
+  std::cout << "SISTEMA DE OPTIMIZACION PARA TIPOS GRANDES\n";
+  std::cout << "Implementacion de la estrategia: usar resultados de 32 bits "
                "como base\n";
   std::cout << std::string(70, '=') << "\n";
 
@@ -168,12 +168,12 @@ int main() {
   show_iteration_reduction_analysis();
 
   std::cout << "\n" << std::string(70, '=') << "\n";
-  std::cout << "CONCLUSIÓN:\n";
-  std::cout << "✅ La optimización reduce significativamente las iteraciones\n";
-  std::cout << "✅ Especialmente efectiva para exponentes grandes (> 32)\n";
-  std::cout << "✅ Aprovecha la eficiencia de tipos de 32 bits como punto de "
+  std::cout << "CONCLUSION:\n";
+  std::cout << "-> La optimizacion reduce significativamente las iteraciones\n";
+  std::cout << "-> Especialmente efectiva para exponentes grandes (> 32)\n";
+  std::cout << "-> Aprovecha la eficiencia de tipos de 32 bits como punto de "
                "partida\n";
-  std::cout << "✅ Mantiene precisión completa del resultado final\n";
+  std::cout << "-> Mantiene precision completa del resultado final\n";
   std::cout << std::string(70, '=') << "\n";
 
   return 0;

@@ -353,7 +353,7 @@ public:
     }
 
     file.close();
-    std::cout << "✓ Resultados exportados a CSV: " << actual_filename
+    std::cout << "> Resultados exportados a CSV: " << actual_filename
               << std::endl;
     return true;
   }
@@ -446,7 +446,7 @@ public:
     }
 
     file.close();
-    std::cout << "✓ Resultados exportados a Markdown: " << actual_filename
+    std::cout << "> Resultados exportados a Markdown: " << actual_filename
               << std::endl;
     return true;
   }
@@ -497,7 +497,7 @@ public:
     file << "}\n";
 
     file.close();
-    std::cout << "✓ Resultados exportados a JSON: " << actual_filename
+    std::cout << "> Resultados exportados a JSON: " << actual_filename
               << std::endl;
     return true;
   }
@@ -511,7 +511,7 @@ public:
     export_to_markdown("benchmark_results/" + base + ".md");
     export_to_json("benchmark_results/" + base + ".json");
 
-    std::cout << "\n✓ Todos los formatos exportados con base: " << base
+    std::cout << "\n> Todos los formatos exportados con base: " << base
               << std::endl;
   }
 
@@ -622,7 +622,7 @@ public:
     // Recomendaciones
     file << "## Recomendaciones\n\n";
     if (modern_wins > legacy_wins) {
-      file << "✅ **Recomendación: Migrar a std::optional**\n\n";
+      file << "> **Recomendacion: Migrar a std::optional**\n\n";
       file << "std::optional demuestra mejor rendimiento en la mayoría de "
               "casos de prueba. ";
       file << "Además, ofrece ventajas adicionales:\n\n";
@@ -648,7 +648,7 @@ public:
     }
 
     file.close();
-    std::cout << "✓ Reporte de comparación exportado: " << actual_filename
+    std::cout << "> Reporte de comparacion exportado: " << actual_filename
               << std::endl;
   }
 };

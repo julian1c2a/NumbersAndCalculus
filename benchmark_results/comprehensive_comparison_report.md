@@ -1,13 +1,13 @@
 # Reporte de Comparación: CalculationResult vs std::optional
 
-**Generado:** 20251031_161557
+**Generado:** 20251031_170159
 
 ## Resumen de Comparaciones
 
 - **Total de comparaciones:** 2
 - **std::optional gana:** 1 tests
 - **CalculationResult gana:** 1 tests
-- **Speedup promedio:** 0.95x
+- **Speedup promedio:** 1.00x
 
 ## Comparaciones Detalladas
 
@@ -15,21 +15,21 @@
 
 | Métrica | CalculationResult | std::optional | Ratio |
 |---------|-------------------|---------------|-------|
-| Avg Time (ns) | 30.494 | 30.474 | 1.00x |
-| Ops/Second | 32792906 | 32815073 | 1.00x |
+| Avg Time (ns) | 30.208 | 28.702 | 1.05x |
+| Ops/Second | 33103594 | 34841263 | 0.95x |
 | Success Rate | 99.5% | 99.5% | - |
 
-**🤝 Empate técnico** - Diferencia < 5%
+**🏆 Winner: std::optional** - 5.2% más rápido
 
 ### Legacy CalculationResult Lookup vs Modern std::optional Division
 
 | Métrica | CalculationResult | std::optional | Ratio |
 |---------|-------------------|---------------|-------|
-| Avg Time (ns) | 27.302 | 30.474 | 0.90x |
-| Ops/Second | 36627621 | 32815073 | 1.12x |
-| Success Rate | 63.8% | 99.5% | - |
+| Avg Time (ns) | 27.397 | 28.702 | 0.95x |
+| Ops/Second | 36499947 | 34841263 | 1.05x |
+| Success Rate | 63.7% | 99.5% | - |
 
-**🏆 Winner: CalculationResult** - 11.6% más rápido
+**🤝 Empate técnico** - Diferencia < 5%
 
 ## Recomendaciones
 

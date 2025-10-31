@@ -31,7 +31,7 @@ public:
 
     std::cout << "=== BENCHMARKS DE MANEJO DE ERRORES ===" << std::endl;
     std::cout << "Datos generados: " << division_data.size()
-              << " pares de división, " << lookup_data.size()
+              << " pares de division, " << lookup_data.size()
               << " índices de lookup" << std::endl;
     std::cout << std::endl;
   }
@@ -278,9 +278,9 @@ private:
     std::cout << std::endl
               << "Iteración sobre " << count << " elementos:" << std::endl;
     std::cout << "  Legacy: " << legacy_iteration_time << " ms ("
-              << legacy_valid_count << " válidos)" << std::endl;
+              << legacy_valid_count << " validos)" << std::endl;
     std::cout << "  Modern: " << modern_iteration_time << " ms ("
-              << modern_valid_count << " válidos)" << std::endl;
+              << modern_valid_count << " validos)" << std::endl;
     std::cout << "  Speedup: " << std::fixed << std::setprecision(2)
               << (legacy_iteration_time / modern_iteration_time) << "x"
               << std::endl;
@@ -653,7 +653,7 @@ int main() {
       << std::endl;
   std::cout << std::endl;
 
-  std::cout << "Información del sistema:" << std::endl;
+  std::cout << "Informacion del sistema:" << std::endl;
   std::cout << "  Compilado con C++: " << __cplusplus << std::endl;
   std::cout << "  sizeof(void*): " << sizeof(void *) << " bytes" << std::endl;
   std::cout << "  sizeof(int): " << sizeof(int) << " bytes" << std::endl;
@@ -693,7 +693,7 @@ int main() {
         "benchmark_results/comprehensive_comparison_report.md");
 
     std::cout << std::endl
-              << "✅ Todos los resultados han sido exportados exitosamente."
+              << "> Todos los resultados han sido exportados exitosamente."
               << std::endl;
 
   } catch (const std::exception &e) {
