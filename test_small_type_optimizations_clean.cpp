@@ -1,4 +1,4 @@
-﻿#include "simplified_power_tables_cpp14.hpp"
+#include "simplified_power_tables_cpp14.hpp"
 #include <cassert>
 #include <chrono>
 #include <cstdint>
@@ -80,66 +80,66 @@ int main() {
   int16_t result_i16 = get_power_of_2_from_table<int16_t>(10);
   std::cout << "   get_power_of_2_from_table<int16_t>(10) = " << result_i16;
   assert(result_i16 == 1024);
-  std::cout << " âœ“\n";
+  std::cout << " [OK]\n";
 
   // uint16_t
   uint16_t result_u16 = get_power_of_2_from_table<uint16_t>(12);
   std::cout << "   get_power_of_2_from_table<uint16_t>(12) = " << result_u16;
   assert(result_u16 == 4096);
-  std::cout << " âœ“\n";
+  std::cout << " [OK]\n";
 
   // 6. Pruebas de verificacion de rangos
   std::cout << "\n6. Pruebas de verificacion de rangos:\n";
 
   std::cout << "   int8_t: rango valido [0, "
             << get_max_power_of_2_exponent<int8_t>() << "] [OK]\n";
-  std::cout << "   uint8_t: rango vÃ¡lido [0, "
-            << get_max_power_of_2_exponent<uint8_t>() << "] âœ“\n";
-  std::cout << "   int16_t: rango vÃ¡lido [0, "
-            << get_max_power_of_2_exponent<int16_t>() << "] âœ“\n";
-  std::cout << "   uint16_t: rango vÃ¡lido [0, "
-            << get_max_power_of_2_exponent<uint16_t>() << "] âœ“\n";
+  std::cout << "   uint8_t: rango valido [0, "
+            << get_max_power_of_2_exponent<uint8_t>() << "] [OK]\n";
+  std::cout << "   int16_t: rango valido [0, "
+            << get_max_power_of_2_exponent<int16_t>() << "] [OK]\n";
+  std::cout << "   uint16_t: rango valido [0, "
+            << get_max_power_of_2_exponent<uint16_t>() << "] [OK]\n";
 
-  // Verificar lÃ­mites
-  assert(is_valid_power_of_2_exponent<int8_t>(6));   // VÃ¡lido
-  assert(!is_valid_power_of_2_exponent<int8_t>(7));  // InvÃ¡lido (overflow)
-  assert(is_valid_power_of_2_exponent<uint8_t>(7));  // VÃ¡lido
-  assert(!is_valid_power_of_2_exponent<uint8_t>(8)); // InvÃ¡lido (overflow)
+  // Verificar limites
+  assert(is_valid_power_of_2_exponent<int8_t>(6));   // Valido
+  assert(!is_valid_power_of_2_exponent<int8_t>(7));  // Invalido (overflow)
+  assert(is_valid_power_of_2_exponent<uint8_t>(7));  // Valido
+  assert(!is_valid_power_of_2_exponent<uint8_t>(8)); // Invalido (overflow)
 
-  std::cout << "   Verificaciones de lÃ­mites correctas âœ“\n";
+  std::cout << "   Verificaciones de limites correctas [OK]\n";
 
-  // 7. DemostraciÃ³n de rendimiento en tiempo de compilaciÃ³n
-  std::cout << "\n7. DemostraciÃ³n de constexpr (tiempo de compilaciÃ³n):\n";
+  // 7. Demostracion de rendimiento en tiempo de compilacion
+  std::cout << "\n7. Demostracion de constexpr (tiempo de compilacion):\n";
 
-  // Estos valores se calculan en tiempo de compilaciÃ³n
+  // Estos valores se calculan en tiempo de compilacion
   constexpr int8_t compile_time_result1 = get_power_of_2_int8(5);
   constexpr uint16_t compile_time_result2 = get_power_of_2_uint16(12);
 
   std::cout << "   constexpr int8_t(2^5) = "
-            << static_cast<int>(compile_time_result1) << " âœ“\n";
+            << static_cast<int>(compile_time_result1) << " [OK]\n";
   std::cout << "   constexpr uint16_t(2^12) = " << compile_time_result2
-            << " âœ“\n";
+            << " [OK]\n";
 
-  static_assert(compile_time_result1 == 32, "Error en cÃ¡lculo constexpr");
-  static_assert(compile_time_result2 == 4096, "Error en cÃ¡lculo constexpr");
+  static_assert(compile_time_result1 == 32, "Error en calculo constexpr");
+  static_assert(compile_time_result2 == 4096, "Error en calculo constexpr");
 
-  std::cout << "   static_assert verificaciones pasaron âœ“\n";
+  std::cout << "   static_assert verificaciones pasaron [OK]\n";
 
-  // 8. ComparaciÃ³n con cÃ¡lculo tradicional
-  std::cout << "\n8. ComparaciÃ³n tablas vs cÃ¡lculo tradicional:\n";
+  // 8. Comparacion con calculo tradicional
+  std::cout << "\n8. Comparacion tablas vs calculo tradicional:\n";
 
-  // Simular tiempo (en compilaciÃ³n real, las tablas son instantÃ¡neas)
+  // Simular tiempo (en compilacion real, las tablas son instantaneas)
   auto start = std::chrono::high_resolution_clock::now();
 
   // Usando tablas
   for (int i = 0; i < 1000; ++i) {
     volatile uint16_t result = get_power_of_2_uint16(10);
-    (void)result; // Evitar optimizaciÃ³n del compilador
+    (void)result; // Evitar optimizacion del compilador
   }
 
   auto mid = std::chrono::high_resolution_clock::now();
 
-  // Usando cÃ¡lculo tradicional
+  // Usando calculo tradicional
   for (int i = 0; i < 1000; ++i) {
     volatile uint16_t result = static_cast<uint16_t>(1 << 10);
     (void)result;
@@ -153,19 +153,19 @@ int main() {
       std::chrono::duration_cast<std::chrono::nanoseconds>(end - mid);
 
   std::cout << "   Tiempo tablas: " << table_time.count() << " ns\n";
-  std::cout << "   Tiempo cÃ¡lculo: " << calc_time.count() << " ns\n";
-  std::cout << "   (En contexto constexpr, las tablas son instantÃ¡neas)\n";
+  std::cout << "   Tiempo calculo: " << calc_time.count() << " ns\n";
+  std::cout << "   (En contexto constexpr, las tablas son instantaneas)\n";
 
   std::cout << "\n=== TODAS LAS PRUEBAS PASARON EXITOSAMENTE ===\n";
-  std::cout << "Las tablas constexpr para tipos pequeÃ±os funcionan "
+  std::cout << "Las tablas constexpr para tipos pequenos funcionan "
                "perfectamente!\n\n";
 
-  std::cout << "ðŸš€ BENEFICIOS LOGRADOS:\n";
-  std::cout << "   âœ… Acceso instantÃ¡neo en tiempo de compilaciÃ³n\n";
-  std::cout << "   âœ… Sin cÃ¡lculos en runtime para potencias de 2\n";
-  std::cout << "   âœ… VerificaciÃ³n automÃ¡tica de overflow\n";
-  std::cout << "   âœ… EspecializaciÃ³n automÃ¡tica por tipo\n";
-  std::cout << "   âœ… API unificada con dispatch inteligente\n";
+  std::cout << "[ROCKET] BENEFICIOS LOGRADOS:\n";
+  std::cout << "   [CHECK] Acceso instantaneo en tiempo de compilacion\n";
+  std::cout << "   [CHECK] Sin calculos en runtime para potencias de 2\n";
+  std::cout << "   [CHECK] Verificacion automatica de overflow\n";
+  std::cout << "   [CHECK] Especializacion automatica por tipo\n";
+  std::cout << "   [CHECK] API unificada con dispatch inteligente\n";
 
   return 0;
 }

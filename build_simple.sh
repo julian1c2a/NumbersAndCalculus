@@ -1,8 +1,8 @@
 #!/bin/bash
 
-# Build Script Simple para AlgoritmiaCombinatoria
-# Uso: ./build_simple.sh [gcc|clang|msvc] [debug|release]
-# Compila directamente sin CMake para máximo control
+# Build Script Simple para AlgoritmiaCombinatoria  
+# Uso: ./build_simple.sh [gcc|clang|msvc] [debug|release] [cpp_version]
+# Compatible con versión .bat - ACTUALIZADO CON SOPORTE C++ STANDARDS
 
 set -e  # Salir si cualquier comando falla
 
@@ -16,33 +16,136 @@ NC='\033[0m' # No Color
 
 # Función para mostrar ayuda
 show_help() {
-    echo -e "${BLUE}Build Script Simple para AlgoritmiaCombinatoria${NC}"
+    echo -e "${BLUE}╔══════════════════════════════════════════════╗${NC}"
+    echo -e "${BLUE}║        AlgoritmiaCombinatoria Builder        ║${NC}"
+    echo -e "${BLUE}║              Modo Simple v2.0                ║${NC}"
+    echo -e "${BLUE}╚══════════════════════════════════════════════╝${NC}"
     echo ""
-    echo "Uso: $0 [COMPILER] [BUILD_TYPE]"
+    echo -e "${YELLOW}MODO SIMPLE (compatible con .bat):${NC}"
     echo ""
-    echo "COMPILER:"
-    echo "  gcc     - Usar GCC (default)"
-    echo "  clang   - Usar Clang"
-    echo "  msvc    - Usar MSVC (Windows)"
+    echo "  $0 [compilador] [tipo] [cpp_std]"
     echo ""
-    echo "BUILD_TYPE:"
-    echo "  debug   - Compilación debug (-O0 -g)"
-    echo "  release - Compilación release (-O2/-O3) (default)"
+    echo -e "${GREEN}COMPILADORES:${NC} gcc, clang, msvc"
+    echo -e "${GREEN}TIPOS:${NC} debug, release"
+    echo -e "${GREEN}ESTÁNDARES C++:${NC} 14, 17, 20, 23 (o latest para MSVC)"
     echo ""
-    echo "Ejemplos:"
-    echo "  $0 gcc debug"
-    echo "  $0 clang release"
-    echo "  $0"
+    echo -e "${BLUE}EJEMPLOS:${NC}"
+    echo "  $0 gcc debug           # GCC Debug C++17 (por defecto)"
+    echo "  $0 clang release       # Clang Release C++17"
+    echo "  $0 gcc debug 20        # GCC Debug C++20"
+    echo "  $0 clang release 23    # Clang Release C++23"
+    echo "  $0 msvc release 23     # MSVC Release C++23 (mapea a latest)"
+    echo "  $0                     # GCC Release C++17 (por defecto)"
     echo ""
-    echo "Funciones adicionales:"
+    echo -e "${PURPLE}FUNCIONES ADICIONALES (LEGADO):${NC}"
     echo "  $0 clean          - Limpiar archivos compilados"
     echo "  $0 test           - Ejecutar todos los programas compilados"
     echo "  $0 benchmark      - Ejecutar solo benchmarks"
 }
 
+# Función para build con CMake (modo simple)
+cmake_build_simple() {
+    # Limpiar build anterior
+    if [[ -d "build" ]]; then
+        echo -e "${YELLOW}[INFO] Limpiando build anterior...${NC}"
+        rm -rf build
+    fi
+    
+    # Crear directorio build
+    mkdir -p build
+    cd build
+    
+    # Configurar argumentos CMake
+    local CMAKE_ARGS="-DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_CXX_STANDARD=$CPP_STANDARD"
+    
+    case "$COMPILER" in
+        gcc)
+            CMAKE_ARGS="$CMAKE_ARGS -DCMAKE_CXX_COMPILER=g++ -DCMAKE_C_COMPILER=gcc"
+            echo -e "${GREEN}[INFO] Configurando para GCC con C++$CPP_STANDARD${NC}"
+            ;;
+        clang)
+            CMAKE_ARGS="$CMAKE_ARGS -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_C_COMPILER=clang"
+            echo -e "${GREEN}[INFO] Configurando para Clang con C++$CPP_STANDARD${NC}"
+            ;;
+        msvc)
+            echo -e "${RED}[ERROR] MSVC no soportado en bash. Usa la versión .bat${NC}"
+            cd ..
+            exit 1
+            ;;
+    esac
+    
+    # Ejecutar CMake
+    echo -e "${BLUE}[INFO] Configurando proyecto...${NC}"
+    if ! cmake .. $CMAKE_ARGS; then
+        echo -e "${RED}[ERROR] Error en la configuración${NC}"
+        cd ..
+        exit 1
+    fi
+    
+    # Construir
+    echo -e "${BLUE}[INFO] Construyendo...${NC}"
+    if ! cmake --build . --config $BUILD_TYPE --parallel 4; then
+        echo -e "${RED}[ERROR] Error en la construcción${NC}"
+        cd ..
+        exit 1
+    fi
+    
+    echo ""
+    echo -e "${GREEN}[SUCCESS] ¡Construcción completada!${NC}"
+    echo ""
+    
+    # Mostrar ejecutables
+    echo -e "${YELLOW}Ejecutables generados:${NC}"
+    find . -name "*.exe" -o -name "*" -type f -executable | grep -v "\\.so" | head -10
+    
+    cd ..
+    echo ""
+    echo -e "${GREEN}[INFO] Build completado en: build/${NC}"
+}
+
+# Función para configurar estándar C++
+set_cpp_standard() {
+    local cpp_std="$1"
+    case "$cpp_std" in
+        ""|"17")
+            CPP_STANDARD="17"
+            ;;
+        "14")
+            CPP_STANDARD="14"
+            ;;
+        "20")
+            CPP_STANDARD="20"
+            ;;
+        "23")
+            if [[ "$COMPILER" == "msvc" ]]; then
+                echo -e "${YELLOW}[INFO] C++23 para MSVC se mapea a 'latest'${NC}"
+                CPP_STANDARD="latest"
+            else
+                CPP_STANDARD="23"
+            fi
+            ;;
+        "latest")
+            if [[ "$COMPILER" == "msvc" ]]; then
+                CPP_STANDARD="latest"
+            else
+                echo -e "${YELLOW}[WARNING] 'latest' solo válido para MSVC, usando C++23${NC}"
+                CPP_STANDARD="23"
+            fi
+            ;;
+        *)
+            echo -e "${YELLOW}[WARNING] Versión C++ '$cpp_std' no válida, usando C++17 por defecto${NC}"
+            CPP_STANDARD="17"
+            ;;
+    esac
+}
+
 # Valores por defecto
 COMPILER=${1:-gcc}
 BUILD_TYPE=${2:-release}
+CPP_STANDARD="17"
+
+# Configurar estándar C++
+set_cpp_standard "$3"
 
 # Manejar comandos especiales
 if [[ "$1" == "-h" || "$1" == "--help" ]]; then
@@ -57,12 +160,25 @@ if [[ "$1" == "clean" ]]; then
     exit 0
 fi
 
+# Manejar funciones especiales (modo legado)
 if [[ "$1" == "test" ]]; then
     BUILD_TYPE="test"
+    CPP_STANDARD="17" # Reset para modo legado
 fi
 
 if [[ "$1" == "benchmark" ]]; then
-    BUILD_TYPE="benchmark"
+    BUILD_TYPE="benchmark" 
+    CPP_STANDARD="17" # Reset para modo legado
+fi
+
+# Detección de modo simple (compatible con .bat)
+SIMPLE_MODE="false"
+if [[ "$1" =~ ^(gcc|clang|msvc)$ && "$2" =~ ^(debug|release)$ ]]; then
+    SIMPLE_MODE="true"
+    echo -e "${GREEN}[INFO] Modo simple: $COMPILER $BUILD_TYPE C++$CPP_STANDARD${NC}"
+elif [[ "$1" == "" ]]; then
+    SIMPLE_MODE="true"
+    echo -e "${GREEN}[INFO] Usando configuración por defecto: GCC release C++17${NC}"
 fi
 
 # Validar argumentos
@@ -78,6 +194,25 @@ if [[ ! "$BUILD_TYPE" =~ ^(debug|release|test|benchmark)$ ]]; then
     exit 1
 fi
 
+# Mostrar header solo en modo simple
+if [[ "$SIMPLE_MODE" == "true" ]]; then
+    echo ""
+    echo -e "${PURPLE}╔══════════════════════════════════════════════╗${NC}"
+    echo -e "${PURPLE}║        AlgoritmiaCombinatoria Builder        ║${NC}"
+    echo -e "${PURPLE}║              Modo Simple v2.0                ║${NC}"
+    echo -e "${PURPLE}╚══════════════════════════════════════════════╝${NC}"
+    echo ""
+    echo -e "Compilador: ${YELLOW}$COMPILER${NC}"
+    echo -e "Build Type: ${YELLOW}$BUILD_TYPE${NC}"
+    echo -e "Estándar C++: ${YELLOW}$CPP_STANDARD${NC}"
+    echo ""
+    
+    # Usar CMake en modo simple (como .bat)
+    cmake_build_simple
+    exit 0
+fi
+
+# Modo legado para test/benchmark
 echo -e "${PURPLE}╔════════════════════════════════════════╗${NC}"
 echo -e "${PURPLE}║     AlgoritmiaCombinatoria Builder     ║${NC}"
 echo -e "${PURPLE}╚════════════════════════════════════════╝${NC}"

@@ -64,14 +64,14 @@ goto show_help
 
 :start_build
 echo.
-echo ╔══════════════════════════════════════════════╗
-echo ║        AlgoritmiaCombinatoria Builder        ║
-echo ║              Modo Simple v2.0                ║
-echo ╚══════════════════════════════════════════════╝
+echo ================================================
+echo         AlgoritmiaCombinatoria Builder        
+echo               Modo Simple v2.0                
+echo ================================================
 echo.
 echo Compilador: %COMPILER%
 echo Build Type: %BUILD_TYPE%
-echo Estándar C++: %CPP_STANDARD%
+echo Estandar C++: %CPP_STANDARD%
 echo.
 
 rem Limpiar build anterior si existe
@@ -124,7 +124,7 @@ if errorlevel 1 (
 )
 
 echo.
-echo [SUCCESS] ¡Construcción completada!
+echo [SUCCESS] Construccion completada!
 echo.
 
 rem Mostrar ejecutables
@@ -138,10 +138,10 @@ echo [INFO] Build completado en: build\
 goto end
 
 :show_help
-echo ╔══════════════════════════════════════════════╗
-echo ║        AlgoritmiaCombinatoria Builder        ║
-echo ║              Modo Simple v2.0                ║
-echo ╚══════════════════════════════════════════════╝
+echo ================================================
+echo         AlgoritmiaCombinatoria Builder        
+echo               Modo Simple v2.0                
+echo ================================================
 echo.
 echo MODO SIMPLE (como pediste):
 echo.
@@ -149,14 +149,14 @@ echo   %0 [compilador] [tipo] [cpp_std]
 echo.
 echo COMPILADORES: gcc, clang, msvc
 echo TIPOS: debug, release
-echo ESTÁNDARES C++: 14, 17, 20, 23 (o latest para MSVC)
+echo ESTANDARES C++: 14, 17, 20, 23 (o latest para MSVC)
 echo.
-echo EJEMPLOS BÁSICOS:
+echo EJEMPLOS BASICOS:
 echo   %0 gcc debug           # GCC Debug C++17 (por defecto)
 echo   %0 clang release       # Clang Release C++17
 echo   %0 msvc release        # MSVC Release C++17
 echo.
-echo EJEMPLOS CON VERSIÓN C++:
+echo EJEMPLOS CON VERSION C++:
 echo   %0 gcc debug 20        # GCC Debug C++20
 echo   %0 clang release 23    # Clang Release C++23
 echo   %0 msvc release latest # MSVC Release C++latest
@@ -200,12 +200,12 @@ if "%~1"=="latest" (
         set "CPP_STANDARD=latest"
         goto :eof
     ) else (
-        echo [WARNING] 'latest' solo válido para MSVC, usando C++23
+        echo [WARNING] 'latest' solo valido para MSVC, usando C++23
         set "CPP_STANDARD=23"
         goto :eof
     )
 )
-echo [WARNING] Versión C++ '%~1' no válida, usando C++17 por defecto
+echo [WARNING] Version C++ '%~1' no valida, usando C++17 por defecto
 set "CPP_STANDARD=17"
 goto :eof
 
