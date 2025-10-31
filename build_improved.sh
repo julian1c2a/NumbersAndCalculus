@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# Script de construcción para AlgoritmiaCombinatoria
-# Soporta múltiples compiladores y configuraciones
+# AlgoritmiaCombinatoria Build System v2.0 - Windows Compatible
+# Script mejorado con soporte nativo para Windows/MSYS2
 
 set -e
 
@@ -19,36 +19,32 @@ show_help() {
     echo ""
     echo "Uso: $0 [OPCIONES] o $0 [COMPILADOR] [TIPO]"
     echo ""
-    echo "Opciones Avanzadas:"
-    echo "  -c, --compiler COMP    Especificar compilador (gcc, clang, msvc)"
-    echo "  -t, --type TYPE        Tipo de construcción (Debug, Release)"
-    echo "  -g, --generator GEN    Generador de CMake (Ninja, 'Unix Makefiles', etc.)"
-    echo "  -j, --jobs JOBS        Número de trabajos paralelos"
-    echo "  -r, --run              Ejecutar después de construir"
-    echo "  -T, --test             Ejecutar pruebas después de construir"
-    echo "  -C, --clean            Limpiar antes de construir"
-    echo "  -B, --benchmarks       Ejecutar benchmarks después de construir"
-    echo "  -A, --all              Construir, probar y ejecutar benchmarks"
-    echo "  -L, --list             Listar ejecutables disponibles"
-    echo "  -S, --stats            Mostrar estadísticas de compilación"
-    echo "  -h, --help             Mostrar esta ayuda"
-    echo ""
     echo "Modo Simple (como pediste):"
     echo "  $0 gcc debug           Compilar con GCC en modo debug"
     echo "  $0 clang release       Compilar con Clang en modo release"
     echo "  $0 msvc release        Compilar con MSVC en modo release"
     echo ""
-    echo "Ejemplos Avanzados:"
-    echo "  $0 -c gcc -t Release -T -B"
-    echo "  $0 --compiler clang --type Debug --test --benchmarks"
-    echo "  $0 --clean --all"
+    echo "Opciones Avanzadas:"
+    echo "  -c, --compiler COMP    Especificar compilador (gcc, clang, msvc)"
+    echo "  -t, --type TYPE        Tipo de construcción (Debug, Release)"
+    echo "  -j, --jobs JOBS        Número de trabajos paralelos"
+    echo "  -T, --test             Ejecutar pruebas después de construir"
+    echo "  -B, --benchmarks       Ejecutar benchmarks después de construir"
+    echo "  -A, --all              Construir, probar y ejecutar benchmarks"
+    echo "  -C, --clean            Limpiar antes de construir"
+    echo "  -L, --list             Listar ejecutables disponibles"
+    echo "  -S, --stats            Mostrar estadísticas de compilación"
+    echo "  -h, --help             Mostrar esta ayuda"
+    echo ""
+    echo "Ejemplos:"
+    echo "  $0 gcc debug           # Modo simple"
     echo "  $0 -A                  # Todo: construir, tests y benchmarks"
+    echo "  $0 -c clang -t Release -T -B"
 }
 
 # Valores por defecto
 COMPILER=""
 BUILD_TYPE="Release"
-GENERATOR="Ninja"
 JOBS=4
 RUN_AFTER=false
 TEST_AFTER=false
@@ -59,13 +55,38 @@ LIST_MODE=false
 STATS_MODE=false
 SIMPLE_MODE=false
 
+# Función para log con colores
+log_info() {
+    echo -e "${BLUE}[INFO]${NC} $1"
+}
+
+log_success() {
+    echo -e "${GREEN}[SUCCESS]${NC} $1"
+}
+
+log_warning() {
+    echo -e "${YELLOW}[WARNING]${NC} $1"
+}
+
+log_error() {
+    echo -e "${RED}[ERROR]${NC} $1"
+}
+
+# Banner de inicio
+show_banner() {
+    echo -e "${PURPLE}╔══════════════════════════════════════════════╗${NC}"
+    echo -e "${PURPLE}║        AlgoritmiaCombinatoria Builder        ║${NC}"
+    echo -e "${PURPLE}║              Version 2.0 Enhanced           ║${NC}"
+    echo -e "${PURPLE}╚══════════════════════════════════════════════╝${NC}"
+    echo ""
+}
+
 # Función para parsear argumentos
 parse_arguments() {
     # Modo simple: detectar argumentos simples primero
     if [[ $# -eq 2 && "$1" =~ ^(gcc|clang|msvc)$ && "$2" =~ ^(debug|release)$ ]]; then
         SIMPLE_MODE=true
         COMPILER="$1"
-        # Convertir debug/release a Debug/Release
         case "$2" in
             debug) BUILD_TYPE="Debug" ;;
             release) BUILD_TYPE="Release" ;;
@@ -89,10 +110,6 @@ parse_arguments() {
                 ;;
             -t|--type)
                 BUILD_TYPE="$2"
-                shift 2
-                ;;
-            -g|--generator)
-                GENERATOR="$2"
                 shift 2
                 ;;
             -j|--jobs)
@@ -134,7 +151,7 @@ parse_arguments() {
                 exit 0
                 ;;
             *)
-                echo "Opción desconocida: $1"
+                echo -e "${RED}Opción desconocida: $1${NC}"
                 show_help
                 exit 1
                 ;;
@@ -142,88 +159,26 @@ parse_arguments() {
     done
 }
 
-# Función para log con colores
-log_info() {
-    echo -e "${BLUE}[INFO]${NC} $1"
-}
-
-log_success() {
-    echo -e "${GREEN}[SUCCESS]${NC} $1"
-}
-
-log_warning() {
-    echo -e "${YELLOW}[WARNING]${NC} $1"
-}
-
-log_error() {
-    echo -e "${RED}[ERROR]${NC} $1"
-}
-
-# Banner de inicio
-show_banner() {
-    echo -e "${PURPLE}╔══════════════════════════════════════════════╗${NC}"
-    echo -e "${PURPLE}║        AlgoritmiaCombinatoria Builder        ║${NC}"
-    echo -e "${PURPLE}║              Version 2.0 Enhanced           ║${NC}"
-    echo -e "${PURPLE}╚══════════════════════════════════════════════╝${NC}"
-    echo ""
-}
-
-# Detectar sistema operativo
-detect_os() {
-    case "$(uname -s)" in
-        Linux*)     OS=Linux;;
-        Darwin*)    OS=macOS;;
-        CYGWIN*)    OS=Windows;;
-        MINGW*)     OS=Windows;;
-        MSYS*)      OS=Windows;;
-        *)          OS="Unknown";;
-    esac
-    log_info "Sistema detectado: $OS"
-}
-
-# Configurar compilador
+# Configurar compilador para CMake
 setup_compiler() {
     local cmake_args=()
     
     case $COMPILER in
         gcc)
-            if [[ "$OS" == "Windows" ]]; then
-                cmake_args+=("-DCMAKE_CXX_COMPILER=C:/msys64/ucrt64/bin/g++.exe")
-                cmake_args+=("-DCMAKE_C_COMPILER=C:/msys64/ucrt64/bin/gcc.exe")
-                log_info "Usando MSYS2 GCC"
-            else
-                cmake_args+=("-DCMAKE_CXX_COMPILER=g++")
-                cmake_args+=("-DCMAKE_C_COMPILER=gcc")
-                log_info "Usando GCC"
-            fi
+            cmake_args+=("-DCMAKE_CXX_COMPILER=g++")
+            cmake_args+=("-DCMAKE_C_COMPILER=gcc")
+            log_info "Usando GCC"
             ;;
         clang)
-            if [[ "$OS" == "Windows" ]]; then
-                cmake_args+=("-DCMAKE_CXX_COMPILER=C:/msys64/ucrt64/bin/clang++.exe")
-                cmake_args+=("-DCMAKE_C_COMPILER=C:/msys64/ucrt64/bin/clang.exe")
-                log_info "Usando MSYS2 Clang"
-            else
-                cmake_args+=("-DCMAKE_CXX_COMPILER=clang++")
-                cmake_args+=("-DCMAKE_C_COMPILER=clang")
-                log_info "Usando Clang"
-            fi
+            cmake_args+=("-DCMAKE_CXX_COMPILER=clang++")
+            cmake_args+=("-DCMAKE_C_COMPILER=clang")
+            log_info "Usando Clang"
             ;;
         msvc)
-            if [[ "$OS" != "Windows" ]]; then
-                log_error "MSVC solo está disponible en Windows"
-                exit 1
-            fi
-            log_info "Usando MSVC"
+            log_info "Usando MSVC (configuración automática)"
             ;;
         "")
-            if [[ "$OS" == "Windows" ]]; then
-                # Por defecto usar MSYS2 GCC en Windows
-                cmake_args+=("-DCMAKE_CXX_COMPILER=C:/msys64/ucrt64/bin/g++.exe")
-                cmake_args+=("-DCMAKE_C_COMPILER=C:/msys64/ucrt64/bin/gcc.exe")
-                log_info "Usando MSYS2 GCC por defecto"
-            else
-                log_info "Usando compilador por defecto del sistema"
-            fi
+            log_info "Usando compilador por defecto"
             ;;
         *)
             log_error "Compilador desconocido: $COMPILER"
@@ -234,6 +189,83 @@ setup_compiler() {
     echo "${cmake_args[@]}"
 }
 
+# Mostrar estadísticas
+show_stats() {
+    if [[ "$STATS_MODE" == true ]]; then
+        log_info "Estadísticas del proyecto:"
+        echo ""
+        
+        # Contar archivos usando métodos compatibles con Windows
+        local cpp_count=0
+        local h_count=0
+        
+        # Buscar archivos .cpp
+        for file in *.cpp **/*.cpp; do
+            [[ -f "$file" ]] && ((cpp_count++))
+        done 2>/dev/null
+        
+        # Buscar archivos .h y .hpp
+        for file in *.h *.hpp **/*.h **/*.hpp; do
+            [[ -f "$file" ]] && ((h_count++))
+        done 2>/dev/null
+        
+        echo "📁 Archivos fuente:"
+        echo "   C++ files: $cpp_count"
+        echo "   Headers: $h_count"
+        
+        # Estadísticas del build
+        if [[ -d "build" ]]; then
+            echo ""
+            echo "🔨 Build directory: build/"
+            
+            local exe_count=0
+            for file in build/*.exe build/**/*.exe; do
+                [[ -f "$file" ]] && ((exe_count++))
+            done 2>/dev/null
+            
+            echo "   Ejecutables: $exe_count"
+        fi
+        
+        echo ""
+        echo "🛠️  Configuración:"
+        echo "   Compilador: ${COMPILER:-"default"}"
+        echo "   Build Type: $BUILD_TYPE"
+        echo "   Jobs: $JOBS"
+        
+        exit 0
+    fi
+}
+
+# Listar ejecutables disponibles
+list_executables() {
+    if [[ "$LIST_MODE" == true ]]; then
+        log_info "Ejecutables disponibles:"
+        echo ""
+        
+        if [[ -d "build" ]]; then
+            cd build
+            local found_any=false
+            
+            echo "En build/:"
+            for file in *.exe **/*.exe; do
+                if [[ -f "$file" ]]; then
+                    echo "  $file"
+                    found_any=true
+                fi
+            done 2>/dev/null
+            
+            if [[ "$found_any" != true ]]; then
+                log_warning "No se encontraron ejecutables"
+            fi
+            
+            cd ..
+        else
+            log_warning "Directorio build/ no existe"
+        fi
+        exit 0
+    fi
+}
+
 # Función principal de construcción
 build_project() {
     log_info "Iniciando construcción del proyecto AlgoritmiaCombinatoria"
@@ -241,17 +273,16 @@ build_project() {
     # Limpiar si se solicita
     if [[ "$CLEAN_BEFORE" == true ]]; then
         log_info "Limpiando directorio de construcción..."
-        rm -rf build/
+        [[ -d "build" ]] && rm -rf build/
     fi
     
     # Crear directorio de construcción
-    mkdir -p build
+    [[ ! -d "build" ]] && mkdir -p build
     cd build
     
     # Configurar CMake
     log_info "Configurando proyecto con CMake..."
     local cmake_args=($(setup_compiler))
-    cmake_args+=("-G" "$GENERATOR")
     cmake_args+=("-DCMAKE_BUILD_TYPE=$BUILD_TYPE")
     
     # Buscar vcpkg si existe
@@ -267,18 +298,6 @@ build_project() {
     cmake --build . --config "$BUILD_TYPE" --parallel "$JOBS"
     
     log_success "Construcción completada exitosamente"
-}
-
-# Ejecutar proyecto
-run_project() {
-    if [[ "$RUN_AFTER" == true ]]; then
-        log_info "Ejecutando proyecto..."
-        if [[ "$OS" == "Windows" ]]; then
-            ./"$BUILD_TYPE"/AlgoritmiaCombinatoria.exe || ./AlgoritmiaCombinatoria.exe
-        else
-            ./AlgoritmiaCombinatoria
-        fi
-    fi
 }
 
 # Ejecutar pruebas
@@ -298,13 +317,11 @@ run_benchmarks() {
     if [[ "$BENCHMARKS_AFTER" == true ]]; then
         log_info "Ejecutando benchmarks..."
         
-        # Lista de benchmarks conocidos
         local benchmarks=(
             "comprehensive_benchmarks"
             "optimization_benchmarks"
             "memory_benchmarks"
             "simple_benchmark"
-            "minimal_benchmark"
         )
         
         local executed=0
@@ -312,23 +329,19 @@ run_benchmarks() {
             local bench_path=""
             
             # Buscar el ejecutable
-            if [[ "$OS" == "Windows" ]]; then
-                if [[ -f "./$BUILD_TYPE/${bench}.exe" ]]; then
-                    bench_path="./$BUILD_TYPE/${bench}.exe"
-                elif [[ -f "./${bench}.exe" ]]; then
-                    bench_path="./${bench}.exe"
-                fi
-            else
-                if [[ -f "./$BUILD_TYPE/$bench" ]]; then
-                    bench_path="./$BUILD_TYPE/$bench"
-                elif [[ -f "./$bench" ]]; then
-                    bench_path="./$bench"
-                fi
-            fi
+            for ext in ".exe" ""; do
+                for dir in "." "$BUILD_TYPE"; do
+                    local candidate="$dir/${bench}${ext}"
+                    if [[ -f "$candidate" && -x "$candidate" ]]; then
+                        bench_path="$candidate"
+                        break 2
+                    fi
+                done
+            done
             
-            if [[ -n "$bench_path" && -x "$bench_path" ]]; then
+            if [[ -n "$bench_path" ]]; then
                 log_info "→ Ejecutando $bench..."
-                if timeout 60s "$bench_path" --quick 2>/dev/null || timeout 60s "$bench_path" 2>/dev/null; then
+                if timeout 60s "$bench_path" 2>/dev/null; then
                     ((executed++))
                     echo ""
                 else
@@ -345,98 +358,9 @@ run_benchmarks() {
     fi
 }
 
-# Listar ejecutables disponibles
-list_executables() {
-    if [[ "$LIST_MODE" == true ]]; then
-        log_info "Ejecutables disponibles en build/:"
-        
-        if [[ -d "build" ]]; then
-            cd build
-            echo ""
-            
-            # Buscar ejecutables
-            local found_any=false
-            
-            if [[ "$OS" == "Windows" ]]; then
-                if ls *.exe 2>/dev/null | head -10; then
-                    found_any=true
-                fi
-                if [[ -d "$BUILD_TYPE" ]]; then
-                    echo -e "\nEn $BUILD_TYPE/:"
-                    if ls "$BUILD_TYPE"/*.exe 2>/dev/null | head -10; then
-                        found_any=true
-                    fi
-                fi
-            else
-                if find . -maxdepth 1 -type f -executable 2>/dev/null | head -10; then
-                    found_any=true
-                fi
-                if [[ -d "$BUILD_TYPE" ]]; then
-                    echo -e "\nEn $BUILD_TYPE/:"
-                    if find "$BUILD_TYPE" -maxdepth 1 -type f -executable 2>/dev/null | head -10; then
-                        found_any=true
-                    fi
-                fi
-            fi
-            
-            if [[ "$found_any" != true ]]; then
-                log_warning "No se encontraron ejecutables"
-            fi
-            
-            cd ..
-        else
-            log_warning "Directorio build/ no existe"
-        fi
-        exit 0
-    fi
-}
-
-# Mostrar estadísticas
-show_stats() {
-    if [[ "$STATS_MODE" == true ]]; then
-        log_info "Estadísticas del proyecto:"
-        echo ""
-        
-        # Contar archivos fuente
-        local cpp_count=$(find . -name "*.cpp" -not -path "./build/*" | wc -l)
-        local h_count=$(find . -name "*.h" -o -name "*.hpp" -not -path "./build/*" | wc -l)
-        
-        echo "📁 Archivos fuente:"
-        echo "   C++ files: $cpp_count"
-        echo "   Headers: $h_count"
-        
-        # Estadísticas del build
-        if [[ -d "build" ]]; then
-            echo ""
-            echo "🔨 Build directory:"
-            echo "   Tamaño: $(du -sh build 2>/dev/null | cut -f1 || echo "N/A")"
-            
-            local exe_count=0
-            if [[ "$OS" == "Windows" ]]; then
-                exe_count=$(find build -name "*.exe" 2>/dev/null | wc -l)
-            else
-                exe_count=$(find build -type f -executable 2>/dev/null | wc -l)
-            fi
-            echo "   Ejecutables: $exe_count"
-        fi
-        
-        # Info del compilador
-        echo ""
-        echo "🛠️  Configuración:"
-        echo "   Compilador: ${COMPILER:-"default"}"
-        echo "   Build Type: $BUILD_TYPE"
-        echo "   Generator: $GENERATOR"
-        echo "   Jobs: $JOBS"
-        echo "   OS: $OS"
-        
-        exit 0
-    fi
-}
-
 # Función principal
 main() {
     show_banner
-    detect_os
     parse_arguments "$@"
     
     # Manejar modos especiales que no requieren build
@@ -459,7 +383,6 @@ main() {
     build_project
     run_tests
     run_benchmarks
-    run_project
     
     # Mostrar resumen final
     echo ""
@@ -470,11 +393,9 @@ main() {
     if [[ -d "build" ]]; then
         cd build
         local exe_count=0
-        if [[ "$OS" == "Windows" ]]; then
-            exe_count=$(find . -name "*.exe" 2>/dev/null | wc -l)
-        else
-            exe_count=$(find . -type f -executable 2>/dev/null | wc -l)
-        fi
+        for file in *.exe **/*.exe; do
+            [[ -f "$file" ]] && ((exe_count++))
+        done 2>/dev/null
         
         echo -e "Ejecutables generados: ${YELLOW}$exe_count${NC}"
         echo -e "Build type: ${YELLOW}$BUILD_TYPE${NC}"

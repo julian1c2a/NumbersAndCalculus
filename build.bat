@@ -13,7 +13,64 @@ set "RUN_AFTER=false"
 set "TEST_AFTER=false"
 set "CLEAN_BEFORE=false"
 
-:: Parsear argumentos de línea de comandos
+:: Detectar modo simple primero (gcc|clang|msvc) (debug|release)
+if "%~1"=="gcc" if "%~2"=="debug" (
+    set "COMPILER=gcc"
+    set "BUILD_TYPE=Debug"
+    echo [INFO] Modo simple: GCC Debug
+    goto end_parse
+)
+if "%~1"=="gcc" if "%~2"=="release" (
+    set "COMPILER=gcc"
+    set "BUILD_TYPE=Release"
+    echo [INFO] Modo simple: GCC Release
+    goto end_parse
+)
+if "%~1"=="clang" if "%~2"=="debug" (
+    set "COMPILER=clang"
+    set "BUILD_TYPE=Debug"
+    echo [INFO] Modo simple: Clang Debug
+    goto end_parse
+)
+if "%~1"=="clang" if "%~2"=="release" (
+    set "COMPILER=clang"
+    set "BUILD_TYPE=Release"
+    echo [INFO] Modo simple: Clang Release
+    goto end_parse
+)
+if "%~1"=="msvc" if "%~2"=="debug" (
+    set "COMPILER=msvc"
+    set "BUILD_TYPE=Debug"
+    echo [INFO] Modo simple: MSVC Debug
+    goto end_parse
+)
+if "%~1"=="msvc" if "%~2"=="release" (
+    set "COMPILER=msvc"
+    set "BUILD_TYPE=Release"
+    echo [INFO] Modo simple: MSVC Release
+    goto end_parse
+)
+:: Modo simple con un solo argumento (compilador)
+if "%~1"=="gcc" if "%~2"=="" (
+    set "COMPILER=gcc"
+    set "BUILD_TYPE=Release"
+    echo [INFO] Modo simple: GCC Release (por defecto)
+    goto end_parse
+)
+if "%~1"=="clang" if "%~2"=="" (
+    set "COMPILER=clang"
+    set "BUILD_TYPE=Release"
+    echo [INFO] Modo simple: Clang Release (por defecto)
+    goto end_parse
+)
+if "%~1"=="msvc" if "%~2"=="" (
+    set "COMPILER=msvc"
+    set "BUILD_TYPE=Release"
+    echo [INFO] Modo simple: MSVC Release (por defecto)
+    goto end_parse
+)
+
+:: Parsear argumentos de línea de comandos avanzados
 :parse_args
 if "%~1"=="" goto end_parse
 if "%~1"=="-c" (
@@ -100,10 +157,15 @@ if "%~1"=="-h" (
 if "%~1"=="--help" (
     goto show_help
 )
-echo Opción desconocida: %~1
-goto show_help
+if not "%~1"=="" (
+    echo Opción desconocida: %~1
+    goto show_help
+)
 
 :end_parse
+
+:: Salir si solo queremos mostrar ayuda
+if "%SHOW_HELP_ONLY%"=="true" exit /b 0
 
 echo [INFO] Iniciando construcción del proyecto AlgoritmiaCombinatoria
 
@@ -191,9 +253,20 @@ echo [SUCCESS] ¡Proceso completado!
 goto end
 
 :show_help
-echo Uso: %0 [OPCIONES]
+echo ╔══════════════════════════════════════════════╗
+echo ║        AlgoritmiaCombinatoria Builder        ║
+echo ║              Windows Enhanced Version        ║
+echo ╚══════════════════════════════════════════════╝
 echo.
-echo Opciones:
+echo Uso: %0 [OPCIONES] o %0 [COMPILADOR] [TIPO]
+echo.
+echo MODO SIMPLE (como pediste):
+echo   %0 gcc debug           Compilar con GCC en modo debug
+echo   %0 clang release       Compilar con Clang en modo release
+echo   %0 msvc release        Compilar con MSVC en modo release
+echo   %0 gcc                 GCC Release (por defecto)
+echo.
+echo OPCIONES AVANZADAS:
 echo   -c, --compiler COMP    Especificar compilador (gcc, clang, msvc)
 echo   -t, --type TYPE        Tipo de construcción (Debug, Release)
 echo   -g, --generator GEN    Generador de CMake (Ninja, "Visual Studio 17 2022", etc.)
@@ -203,9 +276,10 @@ echo   -T, --test             Ejecutar pruebas después de construir
 echo   -C, --clean            Limpiar antes de construir
 echo   -h, --help             Mostrar esta ayuda
 echo.
-echo Ejemplos:
+echo EJEMPLOS AVANZADOS:
 echo   %0 -c gcc -t Release -g Ninja
 echo   %0 --compiler msvc --type Debug --test
 echo   %0 --clean --run
+exit /b 0
 
 :end

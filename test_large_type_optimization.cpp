@@ -178,3 +178,6 @@ int main() {
 
   return 0;
 }
+
+#Usar el sistema CMake existente
+./ build.sh - c gcc - t Release - T
