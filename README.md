@@ -1,5 +1,8 @@
 # AlgoritmiaCombinatoria
 
+cmake_policy(SET CMP0167 NEW)
+find_package(Boost 1.80 REQUIRED)
+
 Un proyecto C++23 para algoritmos combinatorios usando Boost::multiprecision y Catch2 para pruebas unitarias.
 
 ## Características

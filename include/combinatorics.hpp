@@ -2,9 +2,7 @@
 #define COMBINATORICS_HPP
 
 #include "number_type_traits.hpp"
-#include "numeric_limits.hpp"
 #include <boost/multiprecision/cpp_dec_float.hpp>
-#include <boost/multiprecision/cpp_int.hpp>
 #include <boost/rational.hpp>
 #include <concepts>
 #include <vector>

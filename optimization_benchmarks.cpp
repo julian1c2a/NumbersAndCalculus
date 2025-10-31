@@ -5,7 +5,6 @@
 #include <random>
 #include <vector>
 
-
 // NOTA: Este archivo está diseñado para analizar optimizaciones del compilador
 // Compilar con diferentes niveles de optimización: -O0, -O1, -O2, -O3, -Os
 
@@ -70,6 +69,12 @@ private:
     return x * x;
   }
 
+  constexpr std::optional<int> constexpr_optional_test(int x) const {
+    if (x < 0)
+      return std::nullopt;
+    return x * x + x;
+  }
+
   void run_constant_folding_tests() {
     std::cout << "Test de constant folding:" << std::endl;
 
@@ -100,12 +105,6 @@ private:
     std::cout << "  Operaciones por segundo: "
               << (iterations * 3 / (duration.count() / 1000.0)) << std::endl;
     std::cout << std::endl;
-  }
-
-  constexpr std::optional<int> constexpr_optional_test(int x) const {
-    if (x < 0)
-      return std::nullopt;
-    return x * x + x;
   }
 
   void run_loop_optimization_tests() {

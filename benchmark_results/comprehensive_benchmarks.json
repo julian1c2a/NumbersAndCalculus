@@ -1,56 +1,56 @@
 {
-  "timestamp": "20251031_170159",
+  "timestamp": "20251031_225355",
   "total_tests": 7,
   "results": [
     {
       "test_name": "Legacy CalculationResult Division",
       "iterations": 500000,
-      "successful_operations": 497525,
-      "failed_operations": 2475,
-      "avg_time_ns": 30.208,
+      "successful_operations": 497570,
+      "failed_operations": 2430,
+      "avg_time_ns": 32.149,
       "min_time_ns": 0.000,
-      "max_time_ns": 61600.000,
-      "operations_per_second": 33103594
+      "max_time_ns": 50400.000,
+      "operations_per_second": 31105166
     },
     {
       "test_name": "Modern std::optional Division",
       "iterations": 500000,
-      "successful_operations": 497525,
-      "failed_operations": 2475,
-      "avg_time_ns": 28.702,
+      "successful_operations": 497570,
+      "failed_operations": 2430,
+      "avg_time_ns": 29.830,
       "min_time_ns": 0.000,
-      "max_time_ns": 52800.000,
-      "operations_per_second": 34841263
+      "max_time_ns": 40000.000,
+      "operations_per_second": 33523748
     },
     {
       "test_name": "Legacy CalculationResult Lookup",
       "iterations": 1000000,
-      "successful_operations": 636940,
-      "failed_operations": 363060,
-      "avg_time_ns": 27.397,
+      "successful_operations": 635650,
+      "failed_operations": 364350,
+      "avg_time_ns": 28.444,
       "min_time_ns": 0.000,
-      "max_time_ns": 34700.000,
-      "operations_per_second": 36499947
+      "max_time_ns": 38400.000,
+      "operations_per_second": 35156304
     },
     {
       "test_name": "Modern std::optional Lookup",
       "iterations": 1000000,
-      "successful_operations": 636940,
-      "failed_operations": 363060,
-      "avg_time_ns": 27.744,
+      "successful_operations": 635650,
+      "failed_operations": 364350,
+      "avg_time_ns": 28.639,
       "min_time_ns": 0.000,
-      "max_time_ns": 37000.000,
-      "operations_per_second": 36043569
+      "max_time_ns": 47300.000,
+      "operations_per_second": 34917054
     },
     {
       "test_name": "Pure Functions (Square)",
       "iterations": 50000000,
       "successful_operations": 50000000,
       "failed_operations": 0,
-      "avg_time_ns": 1.101,
-      "min_time_ns": 1.101,
-      "max_time_ns": 1.101,
-      "operations_per_second": 908529272
+      "avg_time_ns": 1.138,
+      "min_time_ns": 1.138,
+      "max_time_ns": 1.138,
+      "operations_per_second": 878811846
     },
     {
       "test_name": "Lookup Tables Sequential Access",
@@ -65,12 +65,12 @@
     {
       "test_name": "Lookup Tables Random Access",
       "iterations": 5000000,
-      "successful_operations": 3176240,
-      "failed_operations": 1823760,
-      "avg_time_ns": 6.182,
-      "min_time_ns": 6.182,
-      "max_time_ns": 6.182,
-      "operations_per_second": 161754715
+      "successful_operations": 3185730,
+      "failed_operations": 1814270,
+      "avg_time_ns": 6.088,
+      "min_time_ns": 6.088,
+      "max_time_ns": 6.088,
+      "operations_per_second": 164246764
     }
   ]
 }

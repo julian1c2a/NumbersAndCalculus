@@ -67,16 +67,19 @@ include_directories(include)
 set(SOURCES
     src/main.cpp
     src/combinatorics.cpp
+        factorial_optimization_demo.cpp
 )
 
 # Archivos de cabecera
 set(HEADERS
     include/combinatorics.hpp
     include/combinatorics_impl.hpp
+        factorial_optimization_demo.cpp
 )
 
 # Ejecutable principal
-add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS})
+add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS}
+        factorial_optimization_demo.cpp)
 
 # Enlazar librerías
 target_link_libraries(${PROJECT_NAME} 
@@ -97,6 +100,7 @@ add_executable(tests
     tests/test_main.cpp
     tests/test_combinatorics.cpp
     src/combinatorics.cpp
+        factorial_optimization_demo.cpp
 )
 
 target_link_libraries(tests 
