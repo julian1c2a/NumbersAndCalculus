@@ -21,46 +21,6 @@
 namespace number_calc_impl {
 
 //==============================================================================
-// TRAITS EXTENDIDOS PARA SOPORTAR __int128
-//==============================================================================
-
-// Trait personalizado que incluye __int128
-template <typename T> struct is_integral_extended : std::is_integral<T> {};
-
-#if defined(__GNUC__) || defined(__clang__)
-template <> struct is_integral_extended<__int128> : std::true_type {};
-
-template <> struct is_integral_extended<unsigned __int128> : std::true_type {};
-#endif
-
-template <typename T>
-constexpr bool is_integral_extended_v = is_integral_extended<T>::value;
-
-// Trait personalizado para signed que incluye __int128
-template <typename T> struct is_signed_extended : std::is_signed<T> {};
-
-#if defined(__GNUC__) || defined(__clang__)
-template <> struct is_signed_extended<__int128> : std::true_type {};
-
-template <> struct is_signed_extended<unsigned __int128> : std::false_type {};
-#endif
-
-template <typename T>
-constexpr bool is_signed_extended_v = is_signed_extended<T>::value;
-
-// Trait personalizado para unsigned que incluye unsigned __int128
-template <typename T> struct is_unsigned_extended : std::is_unsigned<T> {};
-
-#if defined(__GNUC__) || defined(__clang__)
-template <> struct is_unsigned_extended<__int128> : std::false_type {};
-
-template <> struct is_unsigned_extended<unsigned __int128> : std::true_type {};
-#endif
-
-template <typename T>
-constexpr bool is_unsigned_extended_v = is_unsigned_extended<T>::value;
-
-//==============================================================================
 // FUNCIÓN TEMPLATE GENÉRICA DE POTENCIA ENTERA
 //==============================================================================
 
@@ -76,8 +36,8 @@ constexpr bool is_unsigned_extended_v = is_unsigned_extended<T>::value;
  */
 template <typename T, typename U>
 constexpr T int_power(T base, U exp) noexcept {
-  static_assert(is_integral_extended_v<T>, "T debe ser un tipo integral");
-  static_assert(is_integral_extended_v<U>, "U debe ser un tipo integral");
+  static_assert(std::is_integral_v<T>, "T debe ser un tipo integral");
+  static_assert(std::is_integral_v<U>, "U debe ser un tipo integral");
 
   if (exp == 0)
     return T{1};
@@ -120,8 +80,8 @@ constexpr T int_power(T base, U exp) noexcept {
  */
 template <typename T, typename U>
 constexpr T int_power_signed_impl(T base, U exp) noexcept {
-  static_assert(is_signed_extended_v<T>, "T debe ser un tipo signed");
-  static_assert(is_integral_extended_v<U>, "U debe ser un tipo integral");
+  static_assert(std::is_signed_v<T>, "T debe ser un tipo signed");
+  static_assert(std::is_integral_v<U>, "U debe ser un tipo integral");
 
   if (exp == 0)
     return T{1};
@@ -172,8 +132,8 @@ constexpr T int_power_signed_impl(T base, U exp) noexcept {
  */
 template <typename T, typename U>
 constexpr T int_power_unsigned_impl(T base, U exp) noexcept {
-  static_assert(is_unsigned_extended_v<T>, "T debe ser un tipo unsigned");
-  static_assert(is_integral_extended_v<U>, "U debe ser un tipo integral");
+  static_assert(std::is_unsigned_v<T>, "T debe ser un tipo unsigned");
+  static_assert(std::is_integral_v<U>, "U debe ser un tipo integral");
 
   if (exp == 0)
     return T{1};
@@ -211,10 +171,10 @@ constexpr T int_power_unsigned_impl(T base, U exp) noexcept {
  */
 template <typename T, typename U>
 constexpr T int_power_dispatch(T base, U exp) noexcept {
-  static_assert(is_integral_extended_v<T>, "T debe ser un tipo integral");
-  static_assert(is_integral_extended_v<U>, "U debe ser un tipo integral");
+  static_assert(std::is_integral_v<T>, "T debe ser un tipo integral");
+  static_assert(std::is_integral_v<U>, "U debe ser un tipo integral");
 
-  if constexpr (is_signed_extended_v<T>) {
+  if constexpr (std::is_signed_v<T>) {
     return int_power_signed_impl(base, exp);
   } else {
     return int_power_unsigned_impl(base, exp);
@@ -236,14 +196,14 @@ constexpr T int_power_dispatch(T base, U exp) noexcept {
  * Incluye verificaciones de overflow para tipos pequeños.
  */
 template <typename T, typename U> constexpr T int_power_2(U exp) noexcept {
-  static_assert(is_integral_extended_v<T>, "T debe ser un tipo integral");
-  static_assert(is_integral_extended_v<U>, "U debe ser un tipo integral");
+  static_assert(std::is_integral_v<T>, "T debe ser un tipo integral");
+  static_assert(std::is_integral_v<U>, "U debe ser un tipo integral");
 
   if (exp == 0)
     return T{1};
 
   // Usar desplazamiento de bits para tipos pequeños/medianos
-  if constexpr (is_signed_extended_v<T>) {
+  if constexpr (std::is_signed_v<T>) {
     // Para tipos signed, verificar límites para evitar overflow
     if constexpr (sizeof(T) == sizeof(int)) {
       if (exp < 31)
@@ -272,7 +232,7 @@ template <typename T, typename U> constexpr T int_power_2(U exp) noexcept {
  */
 template <typename T, typename U>
 constexpr T int_power_2_signed(U exp) noexcept {
-  static_assert(is_signed_extended_v<T>, "T debe ser un tipo signed");
+  static_assert(std::is_signed_v<T>, "T debe ser un tipo signed");
   return int_power_2<T>(exp);
 }
 
@@ -281,7 +241,7 @@ constexpr T int_power_2_signed(U exp) noexcept {
  */
 template <typename T, typename U>
 constexpr T int_power_2_unsigned(U exp) noexcept {
-  static_assert(is_unsigned_extended_v<T>, "T debe ser un tipo unsigned");
+  static_assert(std::is_unsigned_v<T>, "T debe ser un tipo unsigned");
   return int_power_2<T>(exp);
 }
 
@@ -297,8 +257,8 @@ constexpr T int_power_2_unsigned(U exp) noexcept {
  */
 template <typename T, typename U>
 constexpr T int_power_new(T base, U exp) noexcept {
-  static_assert(is_integral_extended_v<T>, "T debe ser un tipo integral");
-  static_assert(is_integral_extended_v<U>, "U debe ser un tipo integral");
+  static_assert(std::is_integral_v<T>, "T debe ser un tipo integral");
+  static_assert(std::is_integral_v<U>, "U debe ser un tipo integral");
 
   // Detección automática de potencias de 2
   if (base == T{2}) {
@@ -321,7 +281,7 @@ constexpr T int_power_new(T base, U exp) noexcept {
  * @return true si la operación es segura
  */
 template <typename T> constexpr bool int_power_safe(T base, T exp) noexcept {
-  static_assert(is_integral_extended_v<T>, "T debe ser un tipo integral");
+  static_assert(std::is_integral_v<T>, "T debe ser un tipo integral");
 
   if (exp == 0)
     return true; // Siempre 1
@@ -354,7 +314,7 @@ template <typename T> constexpr bool int_power_safe(T base, T exp) noexcept {
  * @throws std::overflow_error si la operación causaría overflow
  */
 template <typename T> constexpr T int_power_checked(T base, T exp) {
-  static_assert(is_integral_extended_v<T>, "T debe ser un tipo integral");
+  static_assert(std::is_integral_v<T>, "T debe ser un tipo integral");
 
   if (!int_power_safe(base, exp)) {
     throw std::overflow_error("int_power: resultado causaría overflow");
