@@ -123,7 +123,11 @@ concept std_infty_integral = false;
  */
 template <typename T>
 concept nonstd_integral =
+#ifdef __SIZEOF_INT128__
     std::is_same_v<T, __int128> || std::is_same_v<T, unsigned __int128>;
+#else
+    false; // No hay tipos no-estándar disponibles en este compilador
+#endif
 
 /**
  * @brief Concept para enteros no estándar con signo
@@ -132,7 +136,12 @@ concept nonstd_integral =
  * Verdadero únicamente para __int128 (128 bits con signo).
  */
 template <typename T>
-concept nonstd_signed_integral = std::is_same_v<T, __int128>;
+concept nonstd_signed_integral =
+#ifdef __SIZEOF_INT128__
+    std::is_same_v<T, __int128>;
+#else
+    false; // No hay tipos no-estándar disponibles en este compilador
+#endif
 
 /**
  * @brief Concept para enteros no estándar sin signo
@@ -141,7 +150,12 @@ concept nonstd_signed_integral = std::is_same_v<T, __int128>;
  * Verdadero únicamente para unsigned __int128 (128 bits sin signo).
  */
 template <typename T>
-concept nonstd_unsigned_integral = std::is_same_v<T, unsigned __int128>;
+concept nonstd_unsigned_integral =
+#ifdef __SIZEOF_INT128__
+    std::is_same_v<T, unsigned __int128>;
+#else
+    false; // No hay tipos no-estándar disponibles en este compilador
+#endif
 
 /**
  * @brief Concept para enteros no estándar de tamaño finito

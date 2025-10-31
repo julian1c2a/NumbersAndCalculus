@@ -101,8 +101,62 @@ if "%COMPILER%"=="clang" (
 )
 
 if "%COMPILER%"=="msvc" (
-    set CMAKE_ARGS=-G "Visual Studio 17 2022" -A x64 -DCMAKE_BUILD_TYPE=%BUILD_TYPE% -DCMAKE_CXX_STANDARD=%CPP_STANDARD%
     echo [INFO] Configurando para MSVC con C++%CPP_STANDARD%
+    
+    rem Verificar si ya estamos en un entorno de Visual Studio
+    if not "%VCINSTALLDIR%"=="" (
+        echo [INFO] Entorno de Visual Studio ya configurado
+    ) else (
+        echo [INFO] Configurando entorno MSVC automaticamente...
+        
+        rem Buscar vcvars64.bat en ubicaciones conocidas
+        set "VCVARS_PATH="
+        
+        rem Ruta personalizada del usuario
+        if exist "D:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvars64.bat" (
+            set "VCVARS_PATH=D:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvars64.bat"
+            echo [INFO] Encontrado VS 2022 Community en D:\Program Files
+        )
+        
+        rem Rutas estándar como fallback
+        if "%VCVARS_PATH%"=="" (
+            if exist "C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvars64.bat" (
+                set "VCVARS_PATH=C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvars64.bat"
+                echo [INFO] Encontrado VS 2022 Community en C:\Program Files
+            )
+        )
+        
+        if "%VCVARS_PATH%"=="" (
+            if exist "C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Auxiliary\Build\vcvars64.bat" (
+                set "VCVARS_PATH=C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Auxiliary\Build\vcvars64.bat"
+                echo [INFO] Encontrado VS 2022 Build Tools
+            )
+        )
+        
+        if "%VCVARS_PATH%"=="" (
+            echo [ERROR] No se pudo encontrar vcvars64.bat
+            echo [ERROR] Verifique que Visual Studio 2022 este instalado en:
+            echo [ERROR] - D:\Program Files\Microsoft Visual Studio\2022\Community\
+            echo [ERROR] - C:\Program Files\Microsoft Visual Studio\2022\Community\
+            echo [ERROR] - C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\
+            cd ..
+            exit /b 1
+        )
+        
+        echo [INFO] Ejecutando: "%VCVARS_PATH%"
+        call "%VCVARS_PATH%"
+        
+        if errorlevel 1 (
+            echo [ERROR] Fallo al configurar el entorno de Visual Studio
+            cd ..
+            exit /b 1
+        )
+        
+        echo [SUCCESS] Entorno MSVC configurado correctamente
+    )
+    
+    rem Usar Ninja para MSVC también (más rápido que VS generator)
+    set CMAKE_ARGS=-G "Ninja" -DCMAKE_BUILD_TYPE=%BUILD_TYPE% -DCMAKE_CXX_STANDARD=%CPP_STANDARD% -DCMAKE_C_COMPILER=cl.exe -DCMAKE_CXX_COMPILER=cl.exe
 )
 
 rem Ejecutar CMake

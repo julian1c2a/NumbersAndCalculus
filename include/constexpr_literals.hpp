@@ -27,7 +27,7 @@ namespace constexpr_literals {
 // LITERALES CONSTEXPR PARA __INT128
 //------------------------------------------------------------------------------
 
-#if defined(__GNUC__) || defined(__clang__)
+#if defined(__SIZEOF_INT128__)
 
 /**
  * @brief Literal constexpr para __int128 desde entero
@@ -46,7 +46,8 @@ constexpr __int128 operator""_i128(unsigned long long value) noexcept {
  * @param value Valor entero
  * @return unsigned __int128 evaluado en tiempo de compilación
  */
-constexpr unsigned __int128 operator""_ui128(unsigned long long value) noexcept {
+constexpr unsigned __int128
+operator""_ui128(unsigned long long value) noexcept {
   return static_cast<unsigned __int128>(value);
 }
 
@@ -74,13 +75,13 @@ operator""_pow2_ui128(unsigned long long exponent) noexcept {
                            : (static_cast<unsigned __int128>(1) << exponent);
 }
 
-#endif // defined(__GNUC__) || defined(__clang__)
+#endif // defined(__SIZEOF_INT128__)
 
 //------------------------------------------------------------------------------
 // FUNCIONES CONSTEXPR AUXILIARES PARA FACTORIAL
 //------------------------------------------------------------------------------
 
-#if defined(__GNUC__) || defined(__clang__)
+#if defined(__SIZEOF_INT128__)
 
 /**
  * @brief Calcula factorial constexpr con __int128 (versión iterativa)
@@ -99,12 +100,14 @@ constexpr __int128 constexpr_factorial(__int128 n) noexcept {
     result *= i;
   }
   return result;
-} /**
-   * @brief Calcula potencia constexpr optimizada
-   * @param base Base de la potencia
-   * @param exp Exponente
-   * @return base^exp evaluado en tiempo de compilación
-   */
+}
+
+/**
+ * @brief Calcula potencia constexpr optimizada
+ * @param base Base de la potencia
+ * @param exp Exponente
+ * @return base^exp evaluado en tiempo de compilación
+ */
 constexpr __int128 constexpr_power(__int128 base,
                                    unsigned long long exp) noexcept {
   __int128 result = 1_i128;
@@ -199,13 +202,13 @@ constexpr __int128 constexpr_fibonacci(__int128 n) noexcept {
   return b;
 }
 
-#endif // defined(__GNUC__) || defined(__clang__)
+#endif // defined(__SIZEOF_INT128__)
 
 //------------------------------------------------------------------------------
 // CONSTANTES MATEMÁTICAS PRECALCULADAS
 //------------------------------------------------------------------------------
 
-#if defined(__GNUC__) || defined(__clang__)
+#if defined(__SIZEOF_INT128__)
 
 namespace math_constants {
 // Factoriales precalculados hasta donde cabe en __int128
@@ -248,7 +251,7 @@ constexpr __int128 fibonacci_50 = constexpr_fibonacci(50);   // 12586269025
 constexpr __int128 fibonacci_100 = constexpr_fibonacci(100); // ~3.54E20
 } // namespace math_constants
 
-#endif // defined(__GNUC__) || defined(__clang__)
+#endif // defined(__SIZEOF_INT128__)
 
 } // namespace constexpr_literals
 
@@ -256,7 +259,7 @@ constexpr __int128 fibonacci_100 = constexpr_fibonacci(100); // ~3.54E20
 // EJEMPLO DE USO CON OPTIMIZACIÓN DE FACTORIALES
 //==============================================================================
 
-#ifdef CONSTEXPR_LITERALS_EXAMPLE
+#if defined(CONSTEXPR_LITERALS_EXAMPLE) && defined(__SIZEOF_INT128__)
 
 #include <chrono>
 #include <iostream>
@@ -335,4 +338,4 @@ int main() {
   return 0;
 }
 
-#endif // CONSTEXPR_LITERALS_EXAMPLE
+#endif // defined(CONSTEXPR_LITERALS_EXAMPLE) && defined(__SIZEOF_INT128__)

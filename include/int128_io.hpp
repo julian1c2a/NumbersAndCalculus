@@ -8,6 +8,8 @@
  * Este archivo define operadores de entrada/salida y funciones de conversión
  * de strings para tipos __int128 y unsigned __int128.
  *
+ * @note __int128 solo está disponible en GCC y Clang, no en MSVC
+ *
  * @see boost_multiprecision_io.hpp - Funciones similares para
  * Boost.Multiprecision
  * @note Para tipos Boost.Multiprecision, usar boost_multiprecision_io.hpp
@@ -21,6 +23,9 @@
 #include <sstream>
 #include <stdexcept>
 #include <string>
+
+// __int128 solo está disponible en GCC y Clang
+#ifdef __SIZEOF_INT128__
 
 //==============================================================================
 // NAMESPACE PARA FUNCIONES DE I/O DE __INT128
@@ -214,10 +219,14 @@ inline __int128 from_string_i128(const std::string &str) {
   }
 
   if (negative) {
-    // Verificar underflow
-    if (result >
+    // Verificar underflow - comparar con el valor máximo absoluto para números
+    // negativos Para __int128, el rango es [-(2^127), 2^127-1], así que el
+    // valor mínimo es -(2^127)
+    constexpr unsigned __int128 max_abs_negative =
         static_cast<unsigned __int128>(std::numeric_limits<__int128>::max()) +
-            1) {
+        1;
+
+    if (static_cast<unsigned __int128>(result) > max_abs_negative) {
       throw std::out_of_range("Number too small for __int128");
     }
     result = -result;
@@ -444,5 +453,7 @@ int main() {
 
   return 0;
 }
+
+#endif // __SIZEOF_INT128__
 
 #endif // INT128_IO_EXAMPLE

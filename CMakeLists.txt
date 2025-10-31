@@ -12,8 +12,17 @@ endif()
 
 # Configuración específica para diferentes compiladores
 if(MSVC)
-    # Configuración para MSVC
-    add_compile_options(/std:c++23 /W4 /permissive-)
+    # Configuración para MSVC - usar el estándar especificado
+    if(CMAKE_CXX_STANDARD STREQUAL "17")
+        add_compile_options(/std:c++17 /W4 /permissive-)
+    elseif(CMAKE_CXX_STANDARD STREQUAL "20")
+        add_compile_options(/std:c++20 /W4 /permissive-)
+    elseif(CMAKE_CXX_STANDARD STREQUAL "23" OR CMAKE_CXX_STANDARD STREQUAL "latest")
+        add_compile_options(/std:c++latest /W4 /permissive-)
+    else()
+        # Por defecto C++17
+        add_compile_options(/std:c++17 /W4 /permissive-)
+    endif()
     add_compile_definitions(_WIN32_WINNT=0x0A00)
 elseif(CMAKE_CXX_COMPILER_ID MATCHES "GNU")
     # Configuración para GCC - usar gnu++23 para habilitar extensiones como __int128

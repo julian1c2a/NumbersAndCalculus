@@ -3,6 +3,7 @@
 #include <chrono>
 #include <iostream>
 
+#if defined(__SIZEOF_INT128__)
 
 using namespace constexpr_literals;
 using namespace constexpr_literals::math_constants;
@@ -125,3 +126,19 @@ int main() {
 
   return 0;
 }
+
+#else // !defined(__SIZEOF_INT128__)
+
+#include <iostream>
+
+int main() {
+  std::cout
+      << "Esta demo requiere soporte para __int128 (disponible en GCC/Clang)"
+      << std::endl;
+  std::cout
+      << "MSVC no soporta __int128, use tipos de 64 bits o Boost.Multiprecision"
+      << std::endl;
+  return 0;
+}
+
+#endif // defined(__SIZEOF_INT128__)
