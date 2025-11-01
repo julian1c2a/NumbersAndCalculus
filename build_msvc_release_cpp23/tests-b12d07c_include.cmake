@@ -1,0 +1,5 @@
+if(EXISTS "C:/msys64/ucrt64/home/julian/CppProjects/AlgoritmiaCombinatoria/build_msvc_release_cpp23/tests-b12d07c_tests.cmake")
+  include("C:/msys64/ucrt64/home/julian/CppProjects/AlgoritmiaCombinatoria/build_msvc_release_cpp23/tests-b12d07c_tests.cmake")
+else()
+  add_test(tests_NOT_BUILT-b12d07c tests_NOT_BUILT-b12d07c)
+endif()

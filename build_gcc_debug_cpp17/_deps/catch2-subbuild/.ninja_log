@@ -1,0 +1,21 @@
+# ninja log v7
+2	66	7836608677106737	catch2-populate-prefix/src/catch2-populate-stamp/catch2-populate-mkdir	a3512a7e4a5eaaca
+2	66	7836608677106737	C:/msys64/ucrt64/home/julian/CppProjects/AlgoritmiaCombinatoria/build_gcc_debug_cpp17/_deps/catch2-subbuild/catch2-populate-prefix/src/catch2-populate-stamp/catch2-populate-mkdir	a3512a7e4a5eaaca
+67	4452	7836608720963453	catch2-populate-prefix/src/catch2-populate-stamp/catch2-populate-download	72d0fe8ca44f48e6
+67	4452	7836608720963453	C:/msys64/ucrt64/home/julian/CppProjects/AlgoritmiaCombinatoria/build_gcc_debug_cpp17/_deps/catch2-subbuild/catch2-populate-prefix/src/catch2-populate-stamp/catch2-populate-download	72d0fe8ca44f48e6
+4452	4583	7836608721028540	catch2-populate-prefix/src/catch2-populate-stamp/catch2-populate-update	ac9163175a123a6
+4452	4583	7836608721028540	C:/msys64/ucrt64/home/julian/CppProjects/AlgoritmiaCombinatoria/build_gcc_debug_cpp17/_deps/catch2-subbuild/catch2-populate-prefix/src/catch2-populate-stamp/catch2-populate-update	ac9163175a123a6
+4583	4647	7836608722914515	catch2-populate-prefix/src/catch2-populate-stamp/catch2-populate-patch	196864800554ab8a
+4583	4647	7836608722914515	C:/msys64/ucrt64/home/julian/CppProjects/AlgoritmiaCombinatoria/build_gcc_debug_cpp17/_deps/catch2-subbuild/catch2-populate-prefix/src/catch2-populate-stamp/catch2-populate-patch	196864800554ab8a
+4647	4712	7836608723566068	catch2-populate-prefix/src/catch2-populate-stamp/catch2-populate-configure	70bce154549e4c5b
+4647	4712	7836608723566068	C:/msys64/ucrt64/home/julian/CppProjects/AlgoritmiaCombinatoria/build_gcc_debug_cpp17/_deps/catch2-subbuild/catch2-populate-prefix/src/catch2-populate-stamp/catch2-populate-configure	70bce154549e4c5b
+4712	4777	7836608724208579	catch2-populate-prefix/src/catch2-populate-stamp/catch2-populate-build	f80ba450bb7fdf71
+4712	4777	7836608724208579	C:/msys64/ucrt64/home/julian/CppProjects/AlgoritmiaCombinatoria/build_gcc_debug_cpp17/_deps/catch2-subbuild/catch2-populate-prefix/src/catch2-populate-stamp/catch2-populate-build	f80ba450bb7fdf71
+4777	4843	7836608724869395	catch2-populate-prefix/src/catch2-populate-stamp/catch2-populate-install	82e18617e487a02d
+4777	4843	7836608724869395	C:/msys64/ucrt64/home/julian/CppProjects/AlgoritmiaCombinatoria/build_gcc_debug_cpp17/_deps/catch2-subbuild/catch2-populate-prefix/src/catch2-populate-stamp/catch2-populate-install	82e18617e487a02d
+4843	4907	7836608725515809	catch2-populate-prefix/src/catch2-populate-stamp/catch2-populate-test	df754477fd03949c
+4843	4907	7836608725515809	C:/msys64/ucrt64/home/julian/CppProjects/AlgoritmiaCombinatoria/build_gcc_debug_cpp17/_deps/catch2-subbuild/catch2-populate-prefix/src/catch2-populate-stamp/catch2-populate-test	df754477fd03949c
+4907	4992	7836608726364839	CMakeFiles/catch2-populate-complete	6bc004dc500cd312
+4907	4992	7836608726364839	catch2-populate-prefix/src/catch2-populate-stamp/catch2-populate-done	6bc004dc500cd312
+4907	4992	7836608726364839	C:/msys64/ucrt64/home/julian/CppProjects/AlgoritmiaCombinatoria/build_gcc_debug_cpp17/_deps/catch2-subbuild/CMakeFiles/catch2-populate-complete	6bc004dc500cd312
+4907	4992	7836608726364839	C:/msys64/ucrt64/home/julian/CppProjects/AlgoritmiaCombinatoria/build_gcc_debug_cpp17/_deps/catch2-subbuild/catch2-populate-prefix/src/catch2-populate-stamp/catch2-populate-done	6bc004dc500cd312
