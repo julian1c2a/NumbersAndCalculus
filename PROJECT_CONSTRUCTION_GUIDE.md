@@ -100,7 +100,7 @@ constexpr bool is_extended_integer_v = /* detección automática */;
 
 ### Scripts de Build Requeridos
 
-#### 1. Script Multi-Directorio (build_multi_final.bat)
+#### 1. Script Multi-Directorio (build_multi_final.bat) - PRINCIPAL
 ```bash
 # Debe permitir:
 ./build_multi_final.bat gcc debug 17      # → build_gcc_debug_cpp17/
@@ -108,11 +108,13 @@ constexpr bool is_extended_integer_v = /* detección automática */;
 ./build_multi_final.bat msvc release 23   # → build_msvc_release_cpp23/
 ```
 
-#### 2. Script Bash No-Bloqueante (build_simple.sh)
+#### 2. Script Bash No-Bloqueante (build_simple.sh) - SECUNDARIO
 - **CRÍTICO**: No debe colgarse en "STOP 1"
 - Debe terminar en segundos, no minutos
 - Evitar funciones complejas de detección de versiones
+- **Redirección inteligente**: Si no encuentra herramientas o se solicita MSVC, debe redirigir al script .bat
 - Manejo simple y directo de dependencias
+- **Nota**: MSVC no es compatible con scripts bash - debe redirigir al .bat
 
 ### Problemas Conocidos a Evitar
 
@@ -144,13 +146,14 @@ Al final del proyecto debe:
 ### Comandos de Verificación
 
 ```bash
-# Debe funcionar sin colgarse:
+# Script principal .bat debe funcionar sin colgarse:
 ./build_multi_final.bat gcc debug 17
 ./build_multi_final.bat clang release 20  
 ./build_multi_final.bat msvc release 23
 
-# Script bash debe terminar rápido:
-bash build_simple.sh
+# Script bash debe terminar rápido con redirección inteligente:
+./build_simple.sh gcc debug 17     # → Redirige a .bat si no encuentra herramientas
+./build_simple.sh msvc debug 17    # → Redirige a .bat (MSVC no compatible)
 
 # Debe generar estos directorios:
 build_gcc_debug_cpp17/
@@ -158,12 +161,29 @@ build_clang_release_cpp20/
 build_msvc_release_cpp23/
 ```
 
+### Lecciones Aprendidas y Limitaciones
+
+#### Contextos de Ejecución en Windows:
+1. **PowerShell/CMD**: Ideal para MSVC y herramientas Windows nativas
+2. **MSYS2 Terminal**: Ideal para GCC/Clang con herramientas Unix-like  
+3. **Bash del Sistema**: Limitado, no tiene acceso completo a herramientas MSYS2
+
+#### Estrategia de Scripts:
+- **Script .bat como principal**: Funciona en todos los contextos de Windows
+- **Script .sh como secundario**: Con redirección inteligente al .bat cuando sea necesario
+- **Detección de limitaciones**: El script bash debe detectar cuando no puede funcionar y redirigir
+
+#### Compatibilidad de Compiladores:
+- **GCC/Clang**: Funcionan mejor desde MSYS2, pero también desde .bat
+- **MSVC**: Solo funciona correctamente desde PowerShell/CMD con vcvars
+
 ### Notas Importantes
 
 - **Prioridad máxima**: Sistema multi-directorio funcional
-- **Prioridad alta**: Scripts que no se cuelguen
-- **Foco técnico**: __int128, constexpr, y combinatoria avanzada
+- **Prioridad alta**: Scripts que no se cuelguen + redirección inteligente
+- **Foco técnico**: __int128, constexpr, y combinatoria avanzada  
 - **Compatibilidad**: Windows con MSYS2, Visual Studio, y herramientas nativas
+- **Robustez**: Scripts deben manejar graciosamente las limitaciones del entorno
 
 ---
 

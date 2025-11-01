@@ -13,35 +13,15 @@ YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
-# Detectar sistema operativo
+# Detectar sistema operativo - VERSION SIMPLIFICADA
 detect_os() {
-    case "$(uname -s)" in
-        MSYS_NT*|MINGW*)
-            OS="MINGW64"
-            echo -e "${BLUE}[INFO] Entorno Windows detectado: MINGW64${NC}"
-            ;;
-        Linux*)
-            if grep -qi microsoft /proc/version 2>/dev/null; then
-                OS="WSL"
-                echo -e "${BLUE}[INFO] Windows Subsystem for Linux detectado${NC}"
-            else
-                OS="Linux"
-                echo -e "${BLUE}[INFO] Sistema Linux nativo detectado${NC}"
-            fi
-            ;;
-        Darwin*)
-            OS="macOS"
-            echo -e "${BLUE}[INFO] Sistema macOS detectado${NC}"
-            ;;
-        *)
-            OS="Unknown"
-            echo -e "${YELLOW}[WARNING] Sistema no reconocido: $(uname -s)${NC}"
-            ;;
-    esac
+    # Asumimos MSYS2/MinGW en Windows para simplificar
+    OS="MINGW64"
+    echo -e "${BLUE}[INFO] Entorno MSYS2/MinGW detectado${NC}"
 }
 
-# Detectar generadores disponibles - VERSION SIMPLIFICADA
-detect_generator() {
+# Detectar herramientas de construccion disponibles
+detect_build_tools() {
     # Verificar Ninja primero
     if command -v ninja >/dev/null 2>&1; then
         GENERATOR="Ninja"
@@ -63,8 +43,10 @@ detect_generator() {
         return 0
     fi
     
-    echo -e "${RED}[ERROR] No se encontro Ninja ni Make${NC}"
-    exit 1
+    echo -e "${YELLOW}[WARNING] No se encontraron herramientas de build en este contexto${NC}"
+    echo -e "${YELLOW}[INFO] Para mejor compatibilidad, usa el script Windows:${NC}"
+    echo -e "${YELLOW}       build_multi_final.bat $COMPILER $BUILD_TYPE $CPP_STANDARD${NC}"
+    exit 0
 }
 
 # Detectar numero de cores - VERSION SIMPLIFICADA
@@ -101,7 +83,11 @@ verify_basic_tools() {
             echo -e "${GREEN}[INFO] Clang encontrado${NC}"
             ;;
         msvc)
-            echo -e "${GREEN}[INFO] MSVC sera configurado${NC}"
+            echo -e "${YELLOW}[WARNING] MSVC no es compatible con scripts bash${NC}"
+            echo -e "${YELLOW}[INFO] Para MSVC, usa el script Windows:${NC}"
+            echo -e "${YELLOW}       build_multi_final.bat msvc $BUILD_TYPE $CPP_STANDARD${NC}"
+            echo -e "${YELLOW}[INFO] Saliendo del script bash...${NC}"
+            exit 0
             ;;
         *)
             echo -e "${RED}[ERROR] Compilador '$COMPILER' no soportado${NC}"
@@ -159,7 +145,7 @@ echo ""
 
 # Ejecutar funciones de deteccion
 detect_os
-detect_generator
+detect_build_tools
 detect_cores
 verify_basic_tools
 
