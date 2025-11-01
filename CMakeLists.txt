@@ -53,7 +53,14 @@ else()
 endif()
 
 # Buscar dependencias
-find_package(Boost 1.80 REQUIRED)
+# Intentar encontrar Boost, pero hacerlo opcional para MSVC sin vcpkg
+find_package(Boost 1.80)
+if(NOT Boost_FOUND)
+    message(WARNING "Boost no encontrado - algunas funcionalidades pueden no estar disponibles")
+    set(BOOST_AVAILABLE FALSE)
+else()
+    set(BOOST_AVAILABLE TRUE)
+endif()
 
 # Configuración de vcpkg si está disponible
 if(DEFINED CMAKE_TOOLCHAIN_FILE)

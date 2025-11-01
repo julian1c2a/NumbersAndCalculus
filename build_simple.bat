@@ -1,7 +1,7 @@
 @echo off
 setlocal enabledelayedexpansion
 
-rem Script de construcción mejorado para AlgoritmiaCombinatoria
+rem Script de construccion mejorado para AlgoritmiaCombinatoria
 rem Soporte para modo simple: build.bat [compilador] [tipo]
 
 rem Check for help first
@@ -53,7 +53,7 @@ if "%~1"=="" (
     set "COMPILER=gcc"
     set "BUILD_TYPE=Release"
     set "CPP_STANDARD=17"
-    echo [INFO] Usando configuración por defecto: GCC Release C++17
+    echo [INFO] Usando configuracion por defecto: GCC Release C++17
     goto start_build
 )
 
@@ -77,7 +77,8 @@ echo.
 rem Limpiar build anterior si existe
 if exist build (
     echo [INFO] Limpiando build anterior...
-    rmdir /s /q build
+    rmdir /s /q build 2>nul
+    if exist build del /q build\*.* 2>nul
 )
 
 rem Crear directorio build
@@ -104,7 +105,7 @@ if "%COMPILER%"=="msvc" (
     echo [INFO] Configurando para MSVC con C++%CPP_STANDARD%
     
     rem Verificar si ya estamos en un entorno de Visual Studio
-    if not "%VCINSTALLDIR%"=="" (
+    if NOT "%VCINSTALLDIR%"=="" (
         echo [INFO] Entorno de Visual Studio ya configurado
     ) else (
         echo [INFO] Configurando entorno MSVC automaticamente...
@@ -112,9 +113,9 @@ if "%COMPILER%"=="msvc" (
         rem Buscar vcvars64.bat en ubicaciones conocidas
         set "VCVARS_PATH="
         
-        rem Primero verificar si cl.exe ya está disponible
+        rem Primero verificar si cl.exe ya esta disponible
         where cl.exe >nul 2>&1
-        if not errorlevel 1 (
+        if NOT errorlevel 1 (
             echo [INFO] cl.exe ya disponible en PATH
             set "VCVARS_PATH=ALREADY_SET"
         ) else (
@@ -165,23 +166,69 @@ if "%COMPILER%"=="msvc" (
             )
             
             echo [SUCCESS] Entorno MSVC configurado correctamente
+            
+            rem Limpiar variables de MSYS2 que causan conflictos pero mantener PATH completo
+            echo [INFO] Configurando entorno limpio para MSVC...
+            set C_INCLUDE_PATH=
+            set CPLUS_INCLUDE_PATH=
+            set CPATH=
+            set LIBRARY_PATH=
+            set LD_LIBRARY_PATH=
+            set PKG_CONFIG_PATH=
+            
+            rem Asegurar que CMake esté disponible (agregar MSYS2 bin al final)
+            set "PATH=%PATH%;C:\msys64\ucrt64\bin"
+            
+            rem Verificar herramientas esenciales
+            cl >nul 2>&1
+            if errorlevel 1 (
+                echo [ERROR] cl.exe (MSVC compiler) no encontrado en PATH
+                echo [ERROR] Verifique que vcvars64.bat se ejecutó correctamente
+                cd ..
+                exit /b 1
+            )
+            
+            cmake --version >nul 2>&1
+            if errorlevel 1 (
+                echo [ERROR] CMake no encontrado
+                cd ..
+                exit /b 1
+            )
+            
+            ninja --version >nul 2>&1
+            if errorlevel 1 (
+                echo [WARNING] Ninja no encontrado, usando generador por defecto
+            )
+            
+            echo [INFO] Entorno MSVC configurado - variables problemáticas limpiadas
         )
     )
     
     rem Configurar MSVC con Boost pero evitando conflictos de cabeceras
     set "BOOST_ROOT=C:\msys64\ucrt64"
-    set "Boost_INCLUDE_DIR=C:\msys64\ucrt64\include"
-    set "Boost_LIBRARY_DIR=C:\msys64\ucrt64\lib"
+    rem Configurar CMake para MSVC - usar nombres simples pero asegurar PATH correcto
+    rem MSVC debe estar disponible en PATH después de vcvars64.bat
+    set CMAKE_ARGS=-G "Ninja" -DCMAKE_BUILD_TYPE=%BUILD_TYPE% -DCMAKE_CXX_STANDARD=%CPP_STANDARD% -DCMAKE_C_COMPILER=cl -DCMAKE_CXX_COMPILER=cl
     
-    rem Usar Ninja para MSVC también (más rápido que VS generator)
-    set CMAKE_ARGS=-G "Ninja" -DCMAKE_BUILD_TYPE=%BUILD_TYPE% -DCMAKE_CXX_STANDARD=%CPP_STANDARD% -DCMAKE_C_COMPILER=cl.exe -DCMAKE_CXX_COMPILER=cl.exe -DBoost_INCLUDE_DIR=C:/msys64/ucrt64/include -DBoost_LIBRARY_DIR=C:/msys64/ucrt64/lib -DCMAKE_PREFIX_PATH=C:/msys64/ucrt64
+    rem Intentar usar vcpkg si está disponible
+    if exist "C:\vcpkg\scripts\buildsystems\vcpkg.cmake" (
+        echo [INFO] Usando vcpkg toolchain
+        set "CMAKE_ARGS=%CMAKE_ARGS% -DCMAKE_TOOLCHAIN_FILE=C:\vcpkg\scripts\buildsystems\vcpkg.cmake"
+    ) else if exist "C:\tools\vcpkg\scripts\buildsystems\vcpkg.cmake" (
+        echo [INFO] Usando vcpkg toolchain en C:\tools\vcpkg
+        set "CMAKE_ARGS=%CMAKE_ARGS% -DCMAKE_TOOLCHAIN_FILE=C:\tools\vcpkg\scripts\buildsystems\vcpkg.cmake"
+    ) else (
+        echo [WARNING] vcpkg no encontrado - Boost se buscará en ubicaciones del sistema
+        echo [INFO] Para instalar vcpkg: git clone https://github.com/Microsoft/vcpkg.git C:\vcpkg
+        echo [INFO] Luego ejecutar: C:\vcpkg\bootstrap-vcpkg.bat ^&^& C:\vcpkg\vcpkg install boost:x64-windows
+    )
 )
 
 rem Ejecutar CMake
 echo [INFO] Configurando proyecto...
 cmake .. %CMAKE_ARGS%
 if errorlevel 1 (
-    echo [ERROR] Error en la configuración
+    echo [ERROR] Error en la configuracion
     cd ..
     exit /b 1
 )
@@ -190,7 +237,7 @@ rem Construir
 echo [INFO] Construyendo...
 cmake --build . --config %BUILD_TYPE% --parallel 4
 if errorlevel 1 (
-    echo [ERROR] Error en la construcción
+    echo [ERROR] Error en la construccion
     cd ..
     exit /b 1
 )

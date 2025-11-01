@@ -2,7 +2,8 @@
 
 # Build Script Simple para AlgoritmiaCombinatoria  
 # Uso: ./build_simple.sh [gcc|clang|msvc] [debug|release] [cpp_version]
-# Compatible con versión .bat - ACTUALIZADO CON SOPORTE C++ STANDARDS
+# Compatible con versión .bat - COMPLETAMENTE EQUIVALENTE v2.1
+# Soporte multiplataforma: Linux, macOS, WSL, MSYS2, Cygwin
 
 set -e  # Salir si cualquier comando falla
 
@@ -43,7 +44,166 @@ show_help() {
     echo "  $0 benchmark      - Ejecutar solo benchmarks"
 }
 
-# Función para build con CMake (modo simple)
+# Detectar sistema operativo y entorno
+detect_environment() {
+    # Detectar OS
+    case "$(uname -s)" in
+        MSYS_NT*|MINGW*|CYGWIN*)
+            OS="Windows"
+            SUBSYSTEM=$(uname -s | cut -d'_' -f1)
+            echo -e "${BLUE}[INFO] Entorno Windows detectado: $SUBSYSTEM${NC}"
+            ;;
+        Linux*)
+            if grep -qi microsoft /proc/version 2>/dev/null; then
+                OS="WSL"
+                echo -e "${BLUE}[INFO] Windows Subsystem for Linux detectado${NC}"
+            else
+                OS="Linux"
+                echo -e "${BLUE}[INFO] Sistema Linux nativo detectado${NC}"
+            fi
+            ;;
+        Darwin*)
+            OS="macOS"
+            echo -e "${BLUE}[INFO] Sistema macOS detectado${NC}"
+            ;;
+        *)
+            OS="Unknown"
+            echo -e "${YELLOW}[WARNING] Sistema no reconocido: $(uname -s)${NC}"
+            ;;
+    esac
+}
+
+# Detectar generadores de build disponibles
+detect_build_tools() {
+    GENERATOR=""
+    PARALLEL_JOBS=1
+    
+    # Detectar Ninja
+    if command -v ninja &> /dev/null; then
+        GENERATOR="Ninja"
+        echo -e "${GREEN}[INFO] Ninja encontrado${NC}"
+    elif command -v ninja-build &> /dev/null; then
+        GENERATOR="Ninja"
+        echo -e "${GREEN}[INFO] Ninja encontrado (como ninja-build)${NC}"
+    elif command -v make &> /dev/null; then
+        GENERATOR="Unix Makefiles"
+        echo -e "${GREEN}[INFO] Make encontrado${NC}"
+    else
+        echo -e "${RED}[ERROR] No se encontró Ninja ni Make${NC}"
+        echo -e "${RED}[ERROR] Instale ninja o make para continuar${NC}"
+        exit 1
+    fi
+    
+    # Detectar número de cores para paralelización
+    if command -v nproc &> /dev/null; then
+        PARALLEL_JOBS=$(nproc)
+    elif [[ "$OS" == "macOS" ]] && command -v sysctl &> /dev/null; then
+        PARALLEL_JOBS=$(sysctl -n hw.ncpu)
+    else
+        PARALLEL_JOBS=4
+    fi
+    
+    echo -e "${BLUE}[INFO] Usando $PARALLEL_JOBS jobs paralelos${NC}"
+}
+
+# Detectar y configurar MSVC en entornos Windows/WSL
+setup_msvc_environment() {
+    if [[ "$COMPILER" != "msvc" ]]; then
+        return 0
+    fi
+    
+    local vs_paths=(
+        "/mnt/d/Program Files/Microsoft Visual Studio/2022/Community"
+        "/mnt/c/Program Files/Microsoft Visual Studio/2022/Professional"
+        "/mnt/c/Program Files/Microsoft Visual Studio/2022/Enterprise"
+        "/mnt/c/Program Files (x86)/Microsoft Visual Studio/2019/Professional"
+        "/mnt/d/Program Files (x86)/Microsoft Visual Studio/2019/Community"
+    )
+    
+    # En WSL, intentar encontrar Visual Studio
+    if [[ "$OS" == "WSL" ]]; then
+        for vs_path in "${vs_paths[@]}"; do
+            if [[ -d "$vs_path" ]]; then
+                VS_INSTALL_DIR="$vs_path"
+                echo -e "${GREEN}[INFO] Visual Studio encontrado en: $VS_INSTALL_DIR${NC}"
+                break
+            fi
+        done
+        
+        if [[ -z "$VS_INSTALL_DIR" ]]; then
+            echo -e "${RED}[ERROR] Visual Studio no encontrado en WSL${NC}"
+            echo -e "${YELLOW}[HELP] Paths buscados:${NC}"
+            for path in "${vs_paths[@]}"; do
+                echo "  $path"
+            done
+            exit 1
+        fi
+        
+        # Configurar para usar MSVC a través de WSL
+        MSVC_SETUP_COMMAND="cmd.exe /c \"\\\"$VS_INSTALL_DIR\\VC\\Auxiliary\\Build\\vcvars64.bat\\\" && cmake\""
+        echo -e "${YELLOW}[INFO] MSVC en WSL configurado${NC}"
+        
+    elif [[ "$OS" == "Windows" ]]; then
+        echo -e "${RED}[ERROR] MSVC en MSYS2/MinGW no soportado directamente${NC}"
+        echo -e "${YELLOW}[HELP] Usa el script .bat para MSVC en Windows nativo${NC}"
+        exit 1
+    else
+        echo -e "${RED}[ERROR] MSVC solo disponible en Windows/WSL${NC}"
+        exit 1
+    fi
+}
+
+# Verificar dependencias del sistema
+check_system_dependencies() {
+    echo -e "${BLUE}[INFO] Verificando dependencias del sistema...${NC}"
+    
+    # Verificar CMake
+    if ! command -v cmake &> /dev/null; then
+        echo -e "${RED}[ERROR] CMake no encontrado${NC}"
+        case "$OS" in
+            "Linux"|"WSL")
+                echo -e "${YELLOW}[HELP] Instalar: sudo apt-get install cmake${NC}"
+                ;;
+            "macOS")
+                echo -e "${YELLOW}[HELP] Instalar: brew install cmake${NC}"
+                ;;
+        esac
+        exit 1
+    fi
+    
+    CMAKE_VERSION=$(cmake --version | head -n1 | grep -oE '[0-9]+\.[0-9]+\.[0-9]+')
+    echo -e "${GREEN}[INFO] CMake $CMAKE_VERSION encontrado${NC}"
+    
+    # Verificar compiladores disponibles
+    AVAILABLE_COMPILERS=""
+    
+    if command -v gcc &> /dev/null; then
+        GCC_VERSION=$(gcc --version | head -n1)
+        echo -e "${GREEN}[INFO] $GCC_VERSION${NC}"
+        AVAILABLE_COMPILERS="$AVAILABLE_COMPILERS gcc"
+    fi
+    
+    if command -v clang &> /dev/null; then
+        CLANG_VERSION=$(clang --version | head -n1)
+        echo -e "${GREEN}[INFO] $CLANG_VERSION${NC}"
+        AVAILABLE_COMPILERS="$AVAILABLE_COMPILERS clang"
+    fi
+    
+    # En WSL, verificar acceso a MSVC
+    if [[ "$OS" == "WSL" ]] && command -v cmd.exe &> /dev/null; then
+        echo -e "${GREEN}[INFO] Acceso a Windows desde WSL disponible${NC}"
+        AVAILABLE_COMPILERS="$AVAILABLE_COMPILERS msvc"
+    fi
+    
+    if [[ -z "$AVAILABLE_COMPILERS" ]]; then
+        echo -e "${RED}[ERROR] No hay compiladores disponibles${NC}"
+        exit 1
+    fi
+    
+    echo -e "${BLUE}[INFO] Compiladores disponibles:$AVAILABLE_COMPILERS${NC}"
+}
+
+# Función para build con CMake (modo simple - equivalente al .bat)
 cmake_build_simple() {
     # Limpiar build anterior
     if [[ -d "build" ]]; then
@@ -55,9 +215,15 @@ cmake_build_simple() {
     mkdir -p build
     cd build
     
-    # Configurar argumentos CMake
+    # Configurar argumentos CMake base
     local CMAKE_ARGS="-DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_CXX_STANDARD=$CPP_STANDARD"
     
+    # Agregar generador si está disponible
+    if [[ -n "$GENERATOR" ]]; then
+        CMAKE_ARGS="-G \"$GENERATOR\" $CMAKE_ARGS"
+    fi
+    
+    # Configurar compilador específico
     case "$COMPILER" in
         gcc)
             CMAKE_ARGS="$CMAKE_ARGS -DCMAKE_CXX_COMPILER=g++ -DCMAKE_C_COMPILER=gcc"
@@ -68,39 +234,82 @@ cmake_build_simple() {
             echo -e "${GREEN}[INFO] Configurando para Clang con C++$CPP_STANDARD${NC}"
             ;;
         msvc)
-            echo -e "${RED}[ERROR] MSVC no soportado en bash. Usa la versión .bat${NC}"
-            cd ..
-            exit 1
+            if [[ "$OS" == "WSL" ]]; then
+                echo -e "${GREEN}[INFO] Configurando para MSVC a través de WSL con C++$CPP_STANDARD${NC}"
+                # En WSL, usar herramientas de Windows
+                CMAKE_ARGS="$CMAKE_ARGS -DCMAKE_GENERATOR_TOOLSET=host=x64"
+            else
+                echo -e "${RED}[ERROR] MSVC solo soportado en WSL${NC}"
+                cd ..
+                exit 1
+            fi
             ;;
     esac
     
+    # Configuraciones especificas por OS
+    case "$OS" in
+        "macOS")
+            # En macOS, asegurar compatibilidad
+            CMAKE_ARGS="$CMAKE_ARGS -DCMAKE_OSX_DEPLOYMENT_TARGET=10.15"
+            ;;
+        "WSL")
+            # En WSL, configurar paths para Windows
+            if [[ "$COMPILER" == "msvc" ]]; then
+                CMAKE_ARGS="$CMAKE_ARGS -DCMAKE_SYSTEM_NAME=Windows"
+            fi
+            ;;
+    esac
+    
+    # Detectar y configurar Boost automáticamente
+    echo -e "${BLUE}[INFO] Buscando Boost...${NC}"
+    if pkg-config --exists boost &> /dev/null; then
+        BOOST_VERSION=$(pkg-config --modversion boost 2>/dev/null)
+        echo -e "${GREEN}[INFO] Boost $BOOST_VERSION encontrado via pkg-config${NC}"
+    elif [[ -d "/usr/include/boost" ]]; then
+        echo -e "${GREEN}[INFO] Boost encontrado en /usr/include/boost${NC}"
+    elif [[ -d "/opt/homebrew/include/boost" ]]; then
+        CMAKE_ARGS="$CMAKE_ARGS -DBOOST_ROOT=/opt/homebrew"
+        echo -e "${GREEN}[INFO] Boost encontrado en Homebrew${NC}"
+    else
+        echo -e "${YELLOW}[WARNING] Boost no detectado, CMake intentará encontrarlo${NC}"
+    fi
+    
     # Ejecutar CMake
     echo -e "${BLUE}[INFO] Configurando proyecto...${NC}"
-    if ! cmake .. $CMAKE_ARGS; then
-        echo -e "${RED}[ERROR] Error en la configuración${NC}"
+    echo -e "${YELLOW}[DEBUG] CMake command: cmake .. $CMAKE_ARGS${NC}"
+    
+    if ! eval cmake .. $CMAKE_ARGS; then
+        echo -e "${RED}[ERROR] Error en la configuracion de CMake${NC}"
+        echo -e "${YELLOW}[HELP] Revise los logs arriba para mas detalles${NC}"
         cd ..
         exit 1
     fi
     
     # Construir
-    echo -e "${BLUE}[INFO] Construyendo...${NC}"
-    if ! cmake --build . --config $BUILD_TYPE --parallel 4; then
-        echo -e "${RED}[ERROR] Error en la construcción${NC}"
+    echo -e "${BLUE}[INFO] Construyendo con $PARALLEL_JOBS jobs...${NC}"
+    if ! cmake --build . --config $BUILD_TYPE --parallel $PARALLEL_JOBS; then
+        echo -e "${RED}[ERROR] Error en la construccion${NC}"
+        echo -e "${YELLOW}[HELP] Revise los errores de compilacion arriba${NC}"
         cd ..
         exit 1
     fi
     
     echo ""
-    echo -e "${GREEN}[SUCCESS] ¡Construcción completada!${NC}"
+    echo -e "${GREEN}[SUCCESS] ¡Construccion completada exitosamente!${NC}"
     echo ""
     
-    # Mostrar ejecutables
+    # Mostrar ejecutables generados
     echo -e "${YELLOW}Ejecutables generados:${NC}"
-    find . -name "*.exe" -o -name "*" -type f -executable | grep -v "\\.so" | head -10
+    if [[ "$OS" == "Windows" ]]; then
+        find . -name "*.exe" -type f | head -10
+    else
+        find . -name "*demo*" -type f -executable 2>/dev/null || find . -type f -executable | grep -v "CMake\|\.so\|\.a" | head -10
+    fi
     
     cd ..
     echo ""
     echo -e "${GREEN}[INFO] Build completado en: build/${NC}"
+    echo -e "${BLUE}[INFO] Para ejecutar tests: find build/ -name '*test*' -executable${NC}"
 }
 
 # Función para configurar estándar C++
@@ -139,6 +348,11 @@ set_cpp_standard() {
     esac
 }
 
+# Inicializar entorno
+detect_environment
+detect_build_tools
+check_system_dependencies
+
 # Valores por defecto
 COMPILER=${1:-gcc}
 BUILD_TYPE=${2:-release}
@@ -154,9 +368,9 @@ if [[ "$1" == "-h" || "$1" == "--help" ]]; then
 fi
 
 if [[ "$1" == "clean" ]]; then
-    echo -e "${YELLOW}Limpiando archivos compilados...${NC}"
-    rm -rf build_*/ *.exe *.out
-    echo -e "${GREEN}Limpieza completada${NC}"
+    echo -e "${YELLOW}[INFO] Limpiando archivos compilados...${NC}"
+    rm -rf build/ build_*/ *.exe *.out
+    echo -e "${GREEN}[SUCCESS] Limpieza completada${NC}"
     exit 0
 fi
 
@@ -178,33 +392,49 @@ if [[ "$1" =~ ^(gcc|clang|msvc)$ && "$2" =~ ^(debug|release)$ ]]; then
     echo -e "${GREEN}[INFO] Modo simple: $COMPILER $BUILD_TYPE C++$CPP_STANDARD${NC}"
 elif [[ "$1" == "" ]]; then
     SIMPLE_MODE="true"
-    echo -e "${GREEN}[INFO] Usando configuración por defecto: GCC release C++17${NC}"
+    COMPILER="gcc" # Forzar gcc por defecto
+    BUILD_TYPE="release"
+        echo -e "${GREEN}[INFO] Usando configuracion por defecto: GCC release C++17${NC}"
+fi
+
+# Validar que el compilador solicitado esté disponible
+if [[ ! $AVAILABLE_COMPILERS =~ $COMPILER ]]; then
+    echo -e "${RED}[ERROR] Compilador '$COMPILER' no disponible${NC}"
+    echo -e "${YELLOW}[HELP] Compiladores disponibles:$AVAILABLE_COMPILERS${NC}"
+    exit 1
 fi
 
 # Validar argumentos
 if [[ ! "$COMPILER" =~ ^(gcc|clang|msvc)$ ]]; then
-    echo -e "${RED}Error: Compilador '$COMPILER' no válido${NC}"
+    echo -e "${RED}[ERROR] Compilador '$COMPILER' no válido${NC}"
     echo -e "Opciones válidas: gcc, clang, msvc"
     exit 1
 fi
 
 if [[ ! "$BUILD_TYPE" =~ ^(debug|release|test|benchmark)$ ]]; then
-    echo -e "${RED}Error: Tipo de build '$BUILD_TYPE' no válido${NC}"
+    echo -e "${RED}[ERROR] Tipo de build '$BUILD_TYPE' no válido${NC}"
     echo -e "Opciones válidas: debug, release, test, benchmark"
     exit 1
 fi
+
+# Configurar entorno específico del compilador
+setup_msvc_environment
 
 # Mostrar header solo en modo simple
 if [[ "$SIMPLE_MODE" == "true" ]]; then
     echo ""
     echo -e "${PURPLE}╔══════════════════════════════════════════════╗${NC}"
     echo -e "${PURPLE}║        AlgoritmiaCombinatoria Builder        ║${NC}"
-    echo -e "${PURPLE}║              Modo Simple v2.0                ║${NC}"
+    echo -e "${PURPLE}║              Modo Simple v2.1                ║${NC}"
+    echo -e "${PURPLE}║          (Equivalente a .bat)                ║${NC}"
     echo -e "${PURPLE}╚══════════════════════════════════════════════╝${NC}"
     echo ""
+    echo -e "Sistema: ${YELLOW}$OS${NC}"
+    echo -e "Generador: ${YELLOW}$GENERATOR${NC}"
     echo -e "Compilador: ${YELLOW}$COMPILER${NC}"
     echo -e "Build Type: ${YELLOW}$BUILD_TYPE${NC}"
     echo -e "Estándar C++: ${YELLOW}$CPP_STANDARD${NC}"
+    echo -e "Jobs Paralelos: ${YELLOW}$PARALLEL_JOBS${NC}"
     echo ""
     
     # Usar CMake en modo simple (como .bat)
