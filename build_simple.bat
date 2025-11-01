@@ -112,51 +112,69 @@ if "%COMPILER%"=="msvc" (
         rem Buscar vcvars64.bat en ubicaciones conocidas
         set "VCVARS_PATH="
         
-        rem Ruta personalizada del usuario
-        if exist "D:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvars64.bat" (
-            set "VCVARS_PATH=D:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvars64.bat"
-            echo [INFO] Encontrado VS 2022 Community en D:\Program Files
-        )
-        
-        rem Rutas estándar como fallback
-        if "%VCVARS_PATH%"=="" (
-            if exist "C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvars64.bat" (
+        rem Primero verificar si cl.exe ya está disponible
+        where cl.exe >nul 2>&1
+        if not errorlevel 1 (
+            echo [INFO] cl.exe ya disponible en PATH
+            set "VCVARS_PATH=ALREADY_SET"
+        ) else (
+            rem Buscar vcvars64.bat en ubicaciones conocidas
+            set "VCVARS_PATH="
+            
+            if exist "D:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvars64.bat" (
+                set "VCVARS_PATH=D:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvars64.bat"
+                echo [INFO] Encontrado VS 2022 Community en D:\Program Files
+
+            )
+            
+            if "%VCVARS_PATH%"=="" if exist "C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvars64.bat" (
                 set "VCVARS_PATH=C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvars64.bat"
                 echo [INFO] Encontrado VS 2022 Community en C:\Program Files
             )
-        )
-        
-        if "%VCVARS_PATH%"=="" (
-            if exist "C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Auxiliary\Build\vcvars64.bat" (
+            
+            if "%VCVARS_PATH%"=="" if exist "C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Auxiliary\Build\vcvars64.bat" (
                 set "VCVARS_PATH=C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Auxiliary\Build\vcvars64.bat"
                 echo [INFO] Encontrado VS 2022 Build Tools
             )
         )
         
-        if "%VCVARS_PATH%"=="" (
-            echo [ERROR] No se pudo encontrar vcvars64.bat
-            echo [ERROR] Verifique que Visual Studio 2022 este instalado en:
-            echo [ERROR] - D:\Program Files\Microsoft Visual Studio\2022\Community\
-            echo [ERROR] - C:\Program Files\Microsoft Visual Studio\2022\Community\
-            echo [ERROR] - C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\
-            cd ..
-            exit /b 1
+
+            if "!VCVARS_PATH!"=="" (
+                echo [ERROR] No se pudo encontrar vcvars64.bat
+                echo [ERROR] Verifique que Visual Studio 2022 este instalado en:
+                echo [ERROR] - D:\Program Files\Microsoft Visual Studio\2022\Community\
+                echo [ERROR] - C:\Program Files\Microsoft Visual Studio\2022\Community\
+                echo [ERROR] - C:\Program Files ^(x86^)\Microsoft Visual Studio\2022\BuildTools\
+                cd ..
+                exit /b 1
+            )
         )
         
-        echo [INFO] Ejecutando: "%VCVARS_PATH%"
-        call "%VCVARS_PATH%"
-        
-        if errorlevel 1 (
-            echo [ERROR] Fallo al configurar el entorno de Visual Studio
-            cd ..
-            exit /b 1
+        if "!VCVARS_PATH!"=="ALREADY_SET" (
+            echo [SUCCESS] Entorno MSVC ya configurado
+        ) else (
+            echo [INFO] Ejecutando: "!VCVARS_PATH!"
+            
+            rem Ejecutar vcvars64 
+            call "!VCVARS_PATH!" > nul 2>&1
+            
+            if errorlevel 1 (
+                echo [ERROR] Fallo al configurar el entorno de Visual Studio
+                cd ..
+                exit /b 1
+            )
+            
+            echo [SUCCESS] Entorno MSVC configurado correctamente
         )
-        
-        echo [SUCCESS] Entorno MSVC configurado correctamente
     )
     
+    rem Configurar MSVC con Boost pero evitando conflictos de cabeceras
+    set "BOOST_ROOT=C:\msys64\ucrt64"
+    set "Boost_INCLUDE_DIR=C:\msys64\ucrt64\include"
+    set "Boost_LIBRARY_DIR=C:\msys64\ucrt64\lib"
+    
     rem Usar Ninja para MSVC también (más rápido que VS generator)
-    set CMAKE_ARGS=-G "Ninja" -DCMAKE_BUILD_TYPE=%BUILD_TYPE% -DCMAKE_CXX_STANDARD=%CPP_STANDARD% -DCMAKE_C_COMPILER=cl.exe -DCMAKE_CXX_COMPILER=cl.exe
+    set CMAKE_ARGS=-G "Ninja" -DCMAKE_BUILD_TYPE=%BUILD_TYPE% -DCMAKE_CXX_STANDARD=%CPP_STANDARD% -DCMAKE_C_COMPILER=cl.exe -DCMAKE_CXX_COMPILER=cl.exe -DBoost_INCLUDE_DIR=C:/msys64/ucrt64/include -DBoost_LIBRARY_DIR=C:/msys64/ucrt64/lib -DCMAKE_PREFIX_PATH=C:/msys64/ucrt64
 )
 
 rem Ejecutar CMake
